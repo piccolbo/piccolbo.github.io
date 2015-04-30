@@ -9,8 +9,8 @@ Below is a list of my speaking engagements and here is a <a href="http://www.you
 | Date | Host | Event | Title | 
 | --- | --- | --- | --- | --- |
 | __Upcoming__ | | | |
-| 3/31/2015 | Bay Area UseR Group| [Meetup](http://www.meetup.com/R-Users/events/219136661/)| Randomized software testing in R with quickcheck |
 | __Past__ | | | |
+| 3/31/2015 | Bay Area UseR Group| [Meetup](http://www.meetup.com/R-Users/events/219136661/)| Randomized software testing in R with quickcheck |
 | 10/29/2014 | BIG Data technology and applications - East Bay Group | [Meetup](http://www.meetup.com/Analyzing-and-processing-BIG-Data/events/202353642/) |RHadoop -- Scaling the R Language for Big Data Analysis |
 | 09/23/2014 | Bay Area UseR Group | [Meetup](http://www.meetup.com/R-Users/events/202169752/) | [10 eigenmaps of the United States of America - Antonio Piccolboni](http://piccolboni.info/2014/08/10-eigenmaps-of-the-united-states-of-america.html)|
 | 07/02/2014 |  UCLA | <a href="http://user2014.stat.ucla.edu/">The R User Conference</a> | [Plyrmr: a data manipulation DSL for big data](http://user2014.stat.ucla.edu/abstracts/talks/103_Piccolboni.pdf)

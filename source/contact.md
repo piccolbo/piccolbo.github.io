@@ -11,3 +11,4 @@ footer: true
   * [Twitter](http://twitter.com/piccolbo)
   * [Linkedin](http://linkedin.com/in/piccolbo)
   * [Github](http://github.com/piccolbo)
+  * [Gitter](https://gitter.im/piccolbo/hello)
