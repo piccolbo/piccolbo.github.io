@@ -8,7 +8,7 @@ url: "http://piccolbo.github.io" # the base hostname & protocol for your site
 twitter_username: piccolbo
 github_username:  piccolbo
 permalink: /:year/:month/:title.html
-
+  
 # Build settings
 markdown: kramdown
 
