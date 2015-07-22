@@ -1,0 +1,25 @@
+# Site settings
+title: Antonio Piccolboni
+email: antonio@piccolboni.info
+description: > # this means to ignore newlines until "baseurl:"
+
+baseurl: "" # the subpath of your site, e.g. /blog/
+url: "http://piccolbo.github.io" # the base hostname & protocol for your site
+twitter_username: piccolbo
+github_username:  piccolbo
+
+# Build settings
+markdown: kramdown
+
+gems:
+  - jekyll-archives
+
+jekyll-archives:
+  enabled: 'all'
+  layouts:
+    year: year-archive
+    tag: tag-archive-layout
+  permalinks:
+    year: '/:year/'
+    tag: '/tag/:name/'
+    category: '/category/:name/'

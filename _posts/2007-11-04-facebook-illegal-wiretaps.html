@@ -1,0 +1,17 @@
+---
+layout: post
+title: "Facebook Illegal Wiretaps"
+date: 2007-11-04
+comments: false
+---
+
+<div class='post'>
+<a name='more'></a><br />The formulation of this problem is quite creative, but overall it is just describing a matrix where the rows are workers and the columns are tasks. Workers have numbers and tasks have names and the job completion time depend on whether the worker is odd or even, the number of vowels and consonants in the task name and even common factors between the task name length and the worker number. Contrived but trivial.  On top of that one is called to solve an assignment problem or  weighted bipartite matching in graph speak. One algorithm to do just that is the <a href="http://search.cpan.org/src/ANAGHAKK/Algorithm-Munkres-0.06/lib/Algorithm/Munkres.pm">Hungarian Algorithm</a> (I wish I could speak of the Italian Algorithm, but there are none I know of). To create the input matrix one can use the program below, but it doesn't really achieve the full generality called for by the Facebook people. I wrote it down just to convince myself there wasn't some obvious structure in the matrix. It is written in my latest loop-free style (what do you do if your company doesn't switch to a functional language? Simple, write functionally in any language to the extent that is possible).<br /><br /><br /><pre>use strict;<br /><br />sub nconsonants {<br />my $!$a = shift;<br />$!$a=~s/[aeiouAEIOU]+//g;<br />return length($!$a);<br />}<br /><br />sub factors {<br />my $!$a = shift;<br />my @factors = ([],[],[2],[3],[2,2], [5], [2,3], [7], [2,2,2], [3,3], [2,5]);<br />return $!$factors[length($!$a)];<br />}<br /><br /><br />sub name2info {<br />my $!$a = shift;<br />return {ncon=>nconsonants($!$a),<br />nvow=>length($!$a) - nconsonants ($!$a),<br />fact=>factors($!$a)<br />};<br />}<br /><br />sub progtime {<br />my ($!$prog, $!$info) = @_;<br />my $!$sum = 0;<br />map({$!$sum+=(($!$prog % $!$_)?0:4)} @{$!$info->{fact}});<br />return ($!$prog % 2 ? 1.5 * $!$info->{nvow} : $!$info->{ncon}) + $!$sum + 1;<br />}<br /><br />my @names = qw/ANDROMEDA BARBARA CAMERON DAGMAR EKATERINA FLANNERY GREGORY HAMILTON ISABELLA<br />JEBEDIAH KIMBERLEY LARISSA MEREDITH NORMAN OSWALD PENELOPE QUENTIN RANDALL SAVANNAH TABITHA<br />URSULA VIVIENNE WINONA XAVIER YVONNE ZENOBIA/;<br /><br />my @res=<br />map ({my $!$info = $!$_;<br />[map({my $!$prog = $!$_;<br />progtime($!$prog, $!$info);<br />}<br />1..26)]<br />}<br />map({name2info $!$_<br />}<br />@names));<br /><br />print join "\n", map({join " \t", @$!$_} @res);<br /><br /><pre></pre></pre></div>
+<h2>Comments</h2>
+<div class='comments'>
+<div class='comment'>
+<div class='author'>Josh</div>
+<div class='content'>
+Nice solution. I have posted my solution in Java here<BR/>http://joshjoy.livejournal.com/2007/10/26/<BR/><BR/>Josh</div>
+</div>
+</div>
