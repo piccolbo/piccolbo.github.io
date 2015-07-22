@@ -5,11 +5,11 @@
 <pre class="r"><code>suppressMessages(library(bettR))
 dice = function(size) sample(1:6, size)
 dice(3)</code></pre>
-<pre><code>## [1] 1 6 4</code></pre>
+<pre><code># [1] 4 3 2</code></pre>
 <p>Or you can use partial application:</p>
 <pre class="r"><code>dice = partial(sample, 1:6)
 dice(3)</code></pre>
-<pre><code>## [1] 6 3 1</code></pre>
+<pre><code># [1] 4 1 3</code></pre>
 <p>The advantage of the latter may not be obvious when there are so few arguments involved. But you may have noticed that in the first case we had to write <code>size</code> twice, with the only goal of forwarding the argument from the <code>dice</code> function to <code>sample</code>. If we wanted to model biased dice, we would have to forward also the <code>prob</code> argument, and so on for every other argument that’s not applied to right away. With partial, we are just specifying the value of some arguments and let the other “pass through” with no red-tape.</p>
 <p>Currying uses partial application to the extreme, if you wish, transforming a function of many arguments into a function of a single argument, that returns a function of a single argument … until the last function which returns whatever value. It allows to write <code>f(1,2,3)</code> as <code>curry(f)(1)(2)(3)</code>. Is that useful for programming? The evidence is in favor of a positive answer. If partial application is useful, curried functions make partial application seamless. For instance <code>(* 5)</code> is a function in Haskell implementing multiplication by 5 of its single argument. <code>*</code> is a function of two arguments but is also implicitly curried – provide one argument and you get a function of the remaining one. Scala also allows to define methods with multiple argument lists, that is curried functions (it actually is a generalization of the concept). That said, one can make a reasonable living programming without ever currying a single function. Nonetheless, implementing currying for any language is a great exercise in functional programming.</p>
 <div id="partial-application" class="section level2">
@@ -41,33 +41,33 @@ dice(3)</code></pre>
 <pre class="r"><code>ff = function(a, b, c) list(a, b, c)
 pff = partial(ff, a = 1)
 pff</code></pre>
-<pre><code>## function (b, c) 
-## (function (a, b, c) 
-## list(a, b, c))(a = 1, b, c)</code></pre>
+<pre><code># function (b, c) 
+# (function (a, b, c) 
+# list(a, b, c))(a = 1, b, c)</code></pre>
 <pre class="r"><code>pff(c = 3, 2) #named and unnamed</code></pre>
-<pre><code>## [[1]]
-## [1] 1
-## 
-## [[2]]
-## [1] 2
-## 
-## [[3]]
-## [1] 3</code></pre>
+<pre><code># [[1]]
+# [1] 1
+# 
+# [[2]]
+# [1] 2
+# 
+# [[3]]
+# [1] 3</code></pre>
 <pre class="r"><code>suppressMessages(library(dplyr))
 ff = partial(select, mtcars, mpg) #one lazy and one regular argument
 ff</code></pre>
-<pre><code>## function (...) 
-## (function (.data, ...) 
-## {
-##     select_(.data, .dots = lazyeval::lazy_dots(...))
-## })(.data = mtcars, mpg, ...)</code></pre>
+<pre><code># function (...) 
+# (function (.data, ...) 
+# {
+#     select_(.data, .dots = lazyeval::lazy_dots(...))
+# })(.data = mtcars, mpg, ...)</code></pre>
 <pre class="r"><code>ff(carb)[1:5, ]</code></pre>
-<pre><code>##                    mpg carb
-## Mazda RX4         21.0    4
-## Mazda RX4 Wag     21.0    4
-## Datsun 710        22.8    1
-## Hornet 4 Drive    21.4    1
-## Hornet Sportabout 18.7    2</code></pre>
+<pre><code>#                    mpg carb
+# Mazda RX4         21.0    4
+# Mazda RX4 Wag     21.0    4
+# Datsun 710        22.8    1
+# Hornet 4 Drive    21.4    1
+# Hornet Sportabout 18.7    2</code></pre>
 </div>
 <div id="from-partial-to-curry" class="section level2">
 <h2>From <code>partial</code> to <code>curry</code></h2>
@@ -101,13 +101,13 @@ cuff(1)</code></pre>
 #         curry(partial(f, .args = args))
 #     else f()
 # }
-# &lt;environment: 0x7f86a5257f08&gt;</code></pre>
+# &lt;environment: 0x7f87e0c82f08&gt;</code></pre>
 <pre class="r"><code>cuff(1)(2)</code></pre>
 <pre><code># function (c) 
 # (function (b, c) 
 # (function (a, b, c) 
 # list(a, b, c))(a = 1, b, c))(b = 2, c)
-# &lt;environment: 0x7f86a371ffc0&gt;</code></pre>
+# &lt;environment: 0x7f87e10ddaa0&gt;</code></pre>
 <pre class="r"><code>cuff(1)(2)(3)</code></pre>
 <pre><code># [[1]]
 # [1] 1
@@ -126,7 +126,7 @@ cuff(1)</code></pre>
 #         curry(partial(f, .args = args))
 #     else f()
 # }
-# &lt;environment: 0x7f86a230a9f8&gt;</code></pre>
+# &lt;environment: 0x7f87e324dd40&gt;</code></pre>
 <pre class="r"><code>curry(select)(mtcars)(mpg)(carb)(disp)()[1:5, ] </code></pre>
 <pre><code>#                    mpg carb disp
 # Mazda RX4         21.0    4  160
