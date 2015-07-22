@@ -8,19 +8,21 @@ url: "http://piccolbo.github.io" # the base hostname & protocol for your site
 twitter_username: piccolbo
 github_username:  piccolbo
 permalink: /:year/:month/:title.html
-  
+
 # Build settings
 markdown: kramdown
 
+# Archives, still need work
 gems:
   - jekyll-archives
 
 jekyll-archives:
-  enabled: 'all'
+  enabled: 'year'
   layouts:
     year: year-archive
-    tag: tag-archive-layout
   permalinks:
     year: '/:year/'
-    tag: '/tag/:name/'
-    category: '/category/:name/'
+
+#excerpt
+
+excerpt_separator: '<!-- more -->'

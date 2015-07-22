@@ -1,0 +1,9 @@
+---
+layout: default
+---
+
+{% for archive in site.archives %}
+  {% if archive.type == "year" %}
+    <a href="{{ archive.url }}">{{ archive.title }}</a>
+  {% endif %}
+{% endfor %}
