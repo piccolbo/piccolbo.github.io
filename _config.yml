@@ -12,9 +12,15 @@ permalink: /:year/:month/:title.html
 # Build settings
 markdown: kramdown
 
-# Archives, still need work
+#excerpt
+
+excerpt_separator: '<!-- more -->'
+
 gems:
   - jekyll-archives
+#  - jekyll-feed
+
+# Archives, still need work
 
 jekyll-archives:
   enabled: 'year'
@@ -23,6 +29,7 @@ jekyll-archives:
   permalinks:
     year: '/:year/'
 
-#excerpt
+#feed
 
-excerpt_separator: '<!-- more -->'
+# feed:
+#   path: atom.xml
