@@ -2,7 +2,6 @@
 
   <div class="wrapper">
 
-    <h2 class="footer-heading">{{ site.title }}</h2>
     <div class="PageNavigation">
       {% if page.previous.url %}
         <a class="prev" href="{{page.previous.url}}">&laquo;    {{page.previous.title}}</a>
@@ -13,7 +12,8 @@
     </div>
 
 <!--
-    <div class="footer-col-wrapper">
+<h2 class="footer-heading">{{ site.title }}</h2>
+  <div class="footer-col-wrapper">
       <div class="footer-col  footer-col-1">
         <ul class="contact-list">
           <li>{{ site.title }}</li>
