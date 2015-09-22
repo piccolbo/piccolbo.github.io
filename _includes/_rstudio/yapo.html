@@ -79,7 +79,7 @@ mtcars %&gt;% myfilter</code></pre>
 <pre class="r"><code>4 %&gt;% ~sqrt(sqrt(..))</code></pre>
 <pre><code>[1] 1.414214</code></pre>
 <p>just works, no excuses. Please notice the use of <code>..</code> instead of <code>.</code> to avoid confusion with <code>.</code> as used in models.</p>
-<p>These are use cases suggested by <code>dplyr</code>, but there are others that come from <code>purrr</code> and are here unified in a single operator. What <code>purrr</code> can do on a list of elements, <code>%&gt;%</code> does on a single element. For instance, <code>purrr::map(a.list, a.string)</code> accesses all the elements named after the value of <code>a.string</code> in the list <code>a.list</code>, equivalent to</p>
+<p>These are use cases suggested by <code>dplyr</code>, but there are others that come from <code>purrr</code> and are here unified in a single operator. What <code>purrr</code> can do on a list of elements, <code>%&gt;%</code> does on a single element. For instance, <code>purrr::map(a.list, a.string)</code> accesses all the elements named after the value of <code>a.string</code> in the elements of list <code>a.list</code>, equivalent to</p>
 <pre><code>purrr::map(a.list, function(x) x[[a.string]])</code></pre>
 <p>It may be a small difference, but type the long version many enough times and you are going to be grateful for the shorthand. In analogy with <code>purrr</code>, we can use integer and character vectors on the right side of <code>%&gt;%</code>, implicitly creating an accessor function that gets then applied to the left side, as in</p>
 <pre class="r"><code>mtcars %&gt;% &quot;carb&quot;</code></pre>
