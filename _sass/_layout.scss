@@ -212,7 +212,7 @@
 .post-content {
     margin-bottom: $spacing-unit;
 
-    h2 {
+    h2, h2 code {
         font-size: 32px;
 
         @include media-query($on-laptop) {
@@ -220,7 +220,7 @@
         }
     }
 
-    h3 {
+    h3, h3 code {
         font-size: 26px;
 
         @include media-query($on-laptop) {
@@ -228,7 +228,7 @@
         }
     }
 
-    h4 {
+    h4, h4 code {
         font-size: 20px;
 
         @include media-query($on-laptop) {
