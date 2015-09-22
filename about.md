@@ -14,5 +14,3 @@ footer: true
   * Other recent work on social network analysis (<a href="http://hi5.com/">hi5</a>) and web analytics (<a href="http://quantcast.com/">Quantcast</a>)
   * My <a href="resume.html">resume</a>
   * My <a href="http://www.linkedin.com/in/piccolbo">LinkedIn profile</a>
-
-![portrait](https://secure.gravatar.com/avatar/887af8638abaf35842b85518ea2c1deb.png)
