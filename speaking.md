@@ -14,6 +14,7 @@ Below is a list of my speaking engagements and here is a <a href="http://www.you
 
 | Date | Host | Event | Title |
 | --- | --- | --- | --- | --- |
+| 10/24/2015 | ACM Bay Area Chapter | [Data Science Camp](http://sfbayacm.org/event/silicon-valley-data-science-camp-2015) | Dplyr on Spark: data wrangling bliss |
 | 3/31/2015 | Bay Area UseR Group| [Meetup](http://www.meetup.com/R-Users/events/219136661/)| Randomized software testing in R with quickcheck |
 | 10/29/2014 | BIG Data technology and applications - East Bay Group | [Meetup](http://www.meetup.com/Analyzing-and-processing-BIG-Data/events/202353642/) |RHadoop -- Scaling the R Language for Big Data Analysis |
 | 09/23/2014 | Bay Area UseR Group | [Meetup](http://www.meetup.com/R-Users/events/202169752/) | [10 eigenmaps of the United States of America - Antonio Piccolboni](http://piccolboni.info/2014/08/10-eigenmaps-of-the-united-states-of-america.html)|
