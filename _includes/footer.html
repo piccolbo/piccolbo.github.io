@@ -11,6 +11,7 @@
       {% endif %}
     </div>
 
+<!-- nodebb integration using wp script
 <a id="nodebb/comments"></a>
 <script type="text/javascript">
 var nodeBBURL = 'http://bb.piccolboni.info',
@@ -25,7 +26,7 @@ nbb.src = nodeBBURL + '/plugins/nodebb-plugin-blog-comments/lib/wordpress.js';
 <noscript>Please enable JavaScript to view comments</noscript>
 
 
- <!--
+ <!-- nodebb integration usin ghost script
     <a id="nodebb/comments"></a>
     <script type="text/javascript">
     var nbb = {};
@@ -41,7 +42,7 @@ nbb.src = nodeBBURL + '/plugins/nodebb-plugin-blog-comments/lib/wordpress.js';
     </script>
     <script id="nbb-markdown" type="text/markdown">{{ page.content }}</script>
     <noscript>Please enable JavaScript to view comments</noscript>
-<!--
+<!-- default jekyll footer
 <h2 class="footer-heading">{{ site.title }}</h2>
   <div class="footer-col-wrapper">
       <div class="footer-col  footer-col-1">
