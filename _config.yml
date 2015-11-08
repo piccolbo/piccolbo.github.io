@@ -29,6 +29,9 @@ jekyll-archives:
   permalinks:
     year: '/:year/'
 
+webserver_headers:
+  "Access-Control-Allow-Origin": "*.piccolboni.info"
+  
 #feed
 
 # feed:
