@@ -11,6 +11,36 @@
       {% endif %}
     </div>
 
+<a id="nodebb/comments"></a>
+<script type="text/javascript">
+var nodeBBURL = 'http://bb.piccolboni.info',
+    articleID = '{{ page.id }}';
+
+(function() {
+var nbb = document.createElement('script'); nbb.type = 'text/javascript'; nbb.async = true;
+nbb.src = nodeBBURL + '/plugins/nodebb-plugin-blog-comments/lib/wordpress.js';
+(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(nbb);
+})();
+</script>
+<noscript>Please enable JavaScript to view comments</noscript>
+
+
+ <!--
+    <a id="nodebb/comments"></a>
+    <script type="text/javascript">
+    var nbb = {};
+    nbb.url = 'https://dry-escarpment-3749.herokuapp.com'; // EDIT THIS
+
+    (function() {
+    nbb.articleID = '{{ page.id }}'; nbb.title = '{{ page.title }}'; // suspect page.id should not have slashes
+    nbb.tags = [{{ page.tags }}];
+    nbb.script = document.createElement('script'); nbb.script.type = 'text/javascript'; nbb.script.async = true;
+    nbb.script.src = nbb.url + '/plugins/nodebb-plugin-blog-comments/lib/ghost.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(nbb.script);
+    })();
+    </script>
+    <script id="nbb-markdown" type="text/markdown">{{ page.content }}</script>
+    <noscript>Please enable JavaScript to view comments</noscript>
 <!--
 <h2 class="footer-heading">{{ site.title }}</h2>
   <div class="footer-col-wrapper">
