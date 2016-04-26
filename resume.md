@@ -3,8 +3,9 @@ layout: page
 comments: false
 sharing: true
 footer: true
-title: "Résumé"
 ---
+
+<h1 class="post-title">Résumé</h1>		
 
 ## Summary
 Complete, experienced software engineer and data scientist with industrial and academic backgrounds. Most recent work on big data packages for R, information filtering, social network analysis, web analytics. Cited [5000+](http://scholar.google.com/citations?user=uNAgLfwAAAAJ) times in the scientific literature.

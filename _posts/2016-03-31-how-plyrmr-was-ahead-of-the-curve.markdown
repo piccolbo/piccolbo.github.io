@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "How plyrmr was ahead of the curve"
-date: "2016-03-31 14:10:32 -0700"
+date: 2016-03-31 14:10:32
 ---
 
 I recently attended  a talk by the always excellent Hadley Wickham about his latest work on [creating and visualizing many models](http://blog.rstudio.org/2016/02/02/tidyr-0-4-0/).
