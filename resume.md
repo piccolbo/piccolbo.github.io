@@ -13,6 +13,7 @@ Complete, experienced software engineer and data scientist with industrial and a
 Software for big data analytics, map-reduce algorithms. Algorithm design and implementation, data analysis. Speaker at professional meetings.
 
 ## Work Experience
+
 #### Manager, Per Data LLC --- June 2013 -- present
 
 Design and development of scalable data analysis software and algorithms that combine data scientist-friendly, high level APIs with existing big data platforms (RHadoop project). Technical and instructional documents and community building through speaking engagements and forum participation. Research and analysis as related to scalable data analysis.
