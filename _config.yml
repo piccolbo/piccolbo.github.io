@@ -16,7 +16,9 @@ markdown: kramdown
 
 excerpt_separator: '<!-- more -->'
 
-#gems:
+gems:
+  - jekyll-sitemap
+  - jekyll-seo-tag
 #  - jekyll-archives
 #  - jekyll-feed
 
