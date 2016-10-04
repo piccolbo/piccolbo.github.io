@@ -11,7 +11,7 @@ permalink: /:year/:month/:title.html
 
 # Build settings
 markdown: kramdown
-
+#destination: ../piccolboni.info.site
 #excerpt
 
 excerpt_separator: '<!-- more -->'
