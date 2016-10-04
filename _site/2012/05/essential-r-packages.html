@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>The essential R packages</title>
+  <meta name="description" content="Much has been said about the richness of the system of packages for R, but where is one supposed to start?  The availability of a wide variety of packages ha...">
+
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="canonical" href="http://piccolboni.info/2012/05/essential-r-packages.html">
+  <link rel="alternate" type="application/rss+xml" title="Antonio Piccolboni" href="http://piccolboni.info/atom.xml" />
+  <link rel="shortcut icon" type="image/png" href="gravatar32.png?v=3">
+  <script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+  </script>
+  <!-- Begin Jekyll SEO tag v1.4.0 -->
+<title>The essential R packages - Antonio Piccolboni</title>
+<meta property="og:title" content="The essential R packages" />
+<meta name="description" content="Much has been said about the richness of the system of packages for R, but where is one supposed to start?  The availability of a wide variety of packages has been long highlighted as one of the strengths of the R language. But the number is overwhelming — 5000 is the last I&#39;ve heard and the growth is exponential — and the quality variable. When I talk about quality, I don&#39;t mean only &quot;difficult to use&quot;, &quot;buggy&quot; or &quot;slow&quot;, albeit that happens too. I also mean that some packages offer fundamental abstractions that you are likely to want in your toolset for one reason or another, whereas others have more specific goals, for instance they implement a specialized class of models or are companions for books and classes and so forth. &nbsp;Like other developers, I could just list and praise the ones I use or one could go for the crowdsourced solution of crantastic. Here I would like to suggest a data-driven approach based on the dependencies between packages and graph analysis. A package listed by another as a dependency can be seen as receiving an&nbsp;endorsement of sorts from the developers of the dependent package. After all, they have decided that using that package is better than the alternatives. Also, endorsement from authors of very important package can be seen as carrying more weight than the same for lesser packages. You can guess here a recursive definition whereby being an important package means being a dependency for other important packages. &nbsp;If one considers the graph with packages as vertices and dependencies as directed edges, one can recognize the familiar notion of page rank made popular by Google, whereby important sites are linked to by other important sites. So after some CRAN scraping (the data set is a little old, like 12/2011) and using the package igraph and specifically the page.rank function, here are the top 100 dependency-ranked packages. I entered a brief description by hand for about the first half, then run out of steam. Maybe we need a data-driven solution also for that task.&nbsp;Enjoy.1stats0.0962312835109951Distributions and other basic statistical stuff2methods0.0732606540057392Object oriented programming3graphics0.0536687309266182Of course, graphics4MASS0.0283011225469996Supporting material for Modern Applied Statistics with S5grDevices0.0281639967024237Graphical devices6utils0.0224799288855229In a snub to modularity, a little bit of everything, but very useful7lattice0.0163861320305732graphics8grid0.0126373607888249more graphics9Matrix0.0115594712568376Matrices10mvtnorm0.0108335460953897Multivariate Normal and t Distributions 11sp0.00916721059561437Spatial data12tcltk0.00885654936181036GUI development13splines0.00871777304117854Needless to say, splines14nlme0.00603233299532761Mixed effects models15survival0.00590245542213706Survival analysis16cluster0.00569050414061241Clustering17R.methodsS30.00536103360510169Object oriented programming18coda0.00525607637692928MCMC19igraph0.00510936911063866Graphs (the combinatorial objects)20akima0.00448891508477221Interpolation of irregularly spaced data 21rgl0.004486970357506453D graphics (openGL)22rJava0.00419658010963776Interface with Java23RColorBrewer0.00405898916813389Palette generations24ape0.00401423956752348Phylogenetics25gtools0.00390068663688166Functions that didn&#39;t fit anywhere else, including macros26nnet0.00372527822413159Neural networks27quadprog0.00346928434614538Quadratic programmin28boot0.00339455733075856Bootstrap29Hmisc0.00321230956674779Yet another miscellaneous package30car0.00306687776780923Companion to the Applied Regression book31lme40.00299902494303813Linear mixed-effects models 32foreign0.00299020969373986Data compatibility33Rcpp0.00294488173058946R C++ integration34robustbase0.00292512759045668Robust statistics35zoo0.00291360656774946Regular and irregular Time Series36ggplot20.00280061452368686Graphics37iterators0.00271022721728954Iterators38XML0.00268297000192895XML39plyr0.00260013798376819In-memory data transformations40statmod0.00255576796128438Statistical modeling41tkrplot0.00253629634469558Plots as tk widgets42timeDate0.00241854401215965Time and date43fields0.00229020477891645Spatial data fitting44R.oo0.00224897565304714Object oriented programming45futile.paradigm0.00208727007738248Functional programming46abind0.00203562002853031Multidimensional&nbsp;array manipulation47rscproxy0.00199899977662843Interface to third party applications48scatterplot3d0.001949822791229353D scatter plot49distr0.00193739059491831Object oriented distributions50codetools0.00190284811878283Code analysis51corpcor0.00187713924111935Efficient Estimation of Covariance and (Partial) Correlation 52numDeriv0.00186866167837909Numerical derivatives53gdata0.00186445901204259Data manipulation54emulator0.00186390193431536Bayesian emulation of computer programs 55KernSmooth0.00183629272694307Kernel smoothing56mgcv0.00182832116584045Generalized ridge regression57ade40.00182738399748524Analysis of ecological data58foreach0.00182632366989875Alternative looping construct59e10710.00178029575562234Support material for a class60splus2R0.00176824350296979Support for porting from Splus61plotrix0.00174576155295491More graphics62RGtk20.00172084829088438GUI building with GTK63mclust0.00171720012190246Model-based clustering64colorspace0.00170618665568823Color Space manipulation65rgdal0.00169086925766161Geospatial data processing66gWidgets0.00167347646713519GUI building67tools0.00166343776456814Tools for package development68DBI0.0016518953743629969class0.0016366931624653970snow0.0016358147556272571tframe0.0016202615072740272pcaPP0.0016155219909075473stats40.0015818492897930974vegan0.0015771998028149475timeSeries0.0015571860156293976rgenoud0.0015568411251207477reshape0.0015539630949749478RCurl0.0015130768369441379rpart0.0015019988168796880Rcmdr0.0014943207134398781locfit0.0014648250219192582RJSONIO0.0014606070772627683maxLik0.0014505564252632684startupmsg0.001444551532544985deSolve0.0014310187966129986tseries0.0014033638912416187gamlss0.0013966965780655888lars0.0013914243575720989caTools0.0013767679661726490R.utils0.0013407020810474191genetics0.0013380196842376992proto0.0013258892631500593np0.0013201794485854194spatstat0.0013106670041273195MCMCpack0.0012754992725568296maptools0.0012727709563812897rrcov0.0012691993656958298lpSolve0.0012550281160938499RcppArmadillo0.00125049110788447100copula0.00122860896379617" />
+<meta property="og:description" content="Much has been said about the richness of the system of packages for R, but where is one supposed to start?  The availability of a wide variety of packages has been long highlighted as one of the strengths of the R language. But the number is overwhelming — 5000 is the last I&#39;ve heard and the growth is exponential — and the quality variable. When I talk about quality, I don&#39;t mean only &quot;difficult to use&quot;, &quot;buggy&quot; or &quot;slow&quot;, albeit that happens too. I also mean that some packages offer fundamental abstractions that you are likely to want in your toolset for one reason or another, whereas others have more specific goals, for instance they implement a specialized class of models or are companions for books and classes and so forth. &nbsp;Like other developers, I could just list and praise the ones I use or one could go for the crowdsourced solution of crantastic. Here I would like to suggest a data-driven approach based on the dependencies between packages and graph analysis. A package listed by another as a dependency can be seen as receiving an&nbsp;endorsement of sorts from the developers of the dependent package. After all, they have decided that using that package is better than the alternatives. Also, endorsement from authors of very important package can be seen as carrying more weight than the same for lesser packages. You can guess here a recursive definition whereby being an important package means being a dependency for other important packages. &nbsp;If one considers the graph with packages as vertices and dependencies as directed edges, one can recognize the familiar notion of page rank made popular by Google, whereby important sites are linked to by other important sites. So after some CRAN scraping (the data set is a little old, like 12/2011) and using the package igraph and specifically the page.rank function, here are the top 100 dependency-ranked packages. I entered a brief description by hand for about the first half, then run out of steam. Maybe we need a data-driven solution also for that task.&nbsp;Enjoy.1stats0.0962312835109951Distributions and other basic statistical stuff2methods0.0732606540057392Object oriented programming3graphics0.0536687309266182Of course, graphics4MASS0.0283011225469996Supporting material for Modern Applied Statistics with S5grDevices0.0281639967024237Graphical devices6utils0.0224799288855229In a snub to modularity, a little bit of everything, but very useful7lattice0.0163861320305732graphics8grid0.0126373607888249more graphics9Matrix0.0115594712568376Matrices10mvtnorm0.0108335460953897Multivariate Normal and t Distributions 11sp0.00916721059561437Spatial data12tcltk0.00885654936181036GUI development13splines0.00871777304117854Needless to say, splines14nlme0.00603233299532761Mixed effects models15survival0.00590245542213706Survival analysis16cluster0.00569050414061241Clustering17R.methodsS30.00536103360510169Object oriented programming18coda0.00525607637692928MCMC19igraph0.00510936911063866Graphs (the combinatorial objects)20akima0.00448891508477221Interpolation of irregularly spaced data 21rgl0.004486970357506453D graphics (openGL)22rJava0.00419658010963776Interface with Java23RColorBrewer0.00405898916813389Palette generations24ape0.00401423956752348Phylogenetics25gtools0.00390068663688166Functions that didn&#39;t fit anywhere else, including macros26nnet0.00372527822413159Neural networks27quadprog0.00346928434614538Quadratic programmin28boot0.00339455733075856Bootstrap29Hmisc0.00321230956674779Yet another miscellaneous package30car0.00306687776780923Companion to the Applied Regression book31lme40.00299902494303813Linear mixed-effects models 32foreign0.00299020969373986Data compatibility33Rcpp0.00294488173058946R C++ integration34robustbase0.00292512759045668Robust statistics35zoo0.00291360656774946Regular and irregular Time Series36ggplot20.00280061452368686Graphics37iterators0.00271022721728954Iterators38XML0.00268297000192895XML39plyr0.00260013798376819In-memory data transformations40statmod0.00255576796128438Statistical modeling41tkrplot0.00253629634469558Plots as tk widgets42timeDate0.00241854401215965Time and date43fields0.00229020477891645Spatial data fitting44R.oo0.00224897565304714Object oriented programming45futile.paradigm0.00208727007738248Functional programming46abind0.00203562002853031Multidimensional&nbsp;array manipulation47rscproxy0.00199899977662843Interface to third party applications48scatterplot3d0.001949822791229353D scatter plot49distr0.00193739059491831Object oriented distributions50codetools0.00190284811878283Code analysis51corpcor0.00187713924111935Efficient Estimation of Covariance and (Partial) Correlation 52numDeriv0.00186866167837909Numerical derivatives53gdata0.00186445901204259Data manipulation54emulator0.00186390193431536Bayesian emulation of computer programs 55KernSmooth0.00183629272694307Kernel smoothing56mgcv0.00182832116584045Generalized ridge regression57ade40.00182738399748524Analysis of ecological data58foreach0.00182632366989875Alternative looping construct59e10710.00178029575562234Support material for a class60splus2R0.00176824350296979Support for porting from Splus61plotrix0.00174576155295491More graphics62RGtk20.00172084829088438GUI building with GTK63mclust0.00171720012190246Model-based clustering64colorspace0.00170618665568823Color Space manipulation65rgdal0.00169086925766161Geospatial data processing66gWidgets0.00167347646713519GUI building67tools0.00166343776456814Tools for package development68DBI0.0016518953743629969class0.0016366931624653970snow0.0016358147556272571tframe0.0016202615072740272pcaPP0.0016155219909075473stats40.0015818492897930974vegan0.0015771998028149475timeSeries0.0015571860156293976rgenoud0.0015568411251207477reshape0.0015539630949749478RCurl0.0015130768369441379rpart0.0015019988168796880Rcmdr0.0014943207134398781locfit0.0014648250219192582RJSONIO0.0014606070772627683maxLik0.0014505564252632684startupmsg0.001444551532544985deSolve0.0014310187966129986tseries0.0014033638912416187gamlss0.0013966965780655888lars0.0013914243575720989caTools0.0013767679661726490R.utils0.0013407020810474191genetics0.0013380196842376992proto0.0013258892631500593np0.0013201794485854194spatstat0.0013106670041273195MCMCpack0.0012754992725568296maptools0.0012727709563812897rrcov0.0012691993656958298lpSolve0.0012550281160938499RcppArmadillo0.00125049110788447100copula0.00122860896379617" />
+<link rel="canonical" href="http://piccolboni.info/2012/05/essential-r-packages.html" />
+<meta property="og:url" content="http://piccolboni.info/2012/05/essential-r-packages.html" />
+<meta property="og:site_name" content="Antonio Piccolboni" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2012-05-10T00:00:00-07:00" />
+<link rel="next" href="http://piccolboni.info/2012/10/r-anti-tips.html" title="R anti-tips " />
+<link rel="prev" href="http://piccolboni.info/2011/12/mapreduce-everywhere.html" title="Mapreduce everywhere" />
+<script type="application/ld+json">
+  {
+    "@context": "http://schema.org",
+    "@type": "BlogPosting",
+    "headline": "The essential R packages",
+    "datePublished": "2012-05-10T00:00:00-07:00",
+    "description": "Much has been said about the richness of the system of packages for R, but where is one supposed to start?  The availability of a wide variety of packages has been long highlighted as one of the strengths of the R language. But the number is overwhelming — 5000 is the last I&#39;ve heard and the growth is exponential — and the quality variable. When I talk about quality, I don&#39;t mean only &quot;difficult to use&quot;, &quot;buggy&quot; or &quot;slow&quot;, albeit that happens too. I also mean that some packages offer fundamental abstractions that you are likely to want in your toolset for one reason or another, whereas others have more specific goals, for instance they implement a specialized class of models or are companions for books and classes and so forth. &nbsp;Like other developers, I could just list and praise the ones I use or one could go for the crowdsourced solution of crantastic. Here I would like to suggest a data-driven approach based on the dependencies between packages and graph analysis. A package listed by another as a dependency can be seen as receiving an&nbsp;endorsement of sorts from the developers of the dependent package. After all, they have decided that using that package is better than the alternatives. Also, endorsement from authors of very important package can be seen as carrying more weight than the same for lesser packages. You can guess here a recursive definition whereby being an important package means being a dependency for other important packages. &nbsp;If one considers the graph with packages as vertices and dependencies as directed edges, one can recognize the familiar notion of page rank made popular by Google, whereby important sites are linked to by other important sites. So after some CRAN scraping (the data set is a little old, like 12/2011) and using the package igraph and specifically the page.rank function, here are the top 100 dependency-ranked packages. I entered a brief description by hand for about the first half, then run out of steam. Maybe we need a data-driven solution also for that task.&nbsp;Enjoy.1stats0.0962312835109951Distributions and other basic statistical stuff2methods0.0732606540057392Object oriented programming3graphics0.0536687309266182Of course, graphics4MASS0.0283011225469996Supporting material for Modern Applied Statistics with S5grDevices0.0281639967024237Graphical devices6utils0.0224799288855229In a snub to modularity, a little bit of everything, but very useful7lattice0.0163861320305732graphics8grid0.0126373607888249more graphics9Matrix0.0115594712568376Matrices10mvtnorm0.0108335460953897Multivariate Normal and t Distributions 11sp0.00916721059561437Spatial data12tcltk0.00885654936181036GUI development13splines0.00871777304117854Needless to say, splines14nlme0.00603233299532761Mixed effects models15survival0.00590245542213706Survival analysis16cluster0.00569050414061241Clustering17R.methodsS30.00536103360510169Object oriented programming18coda0.00525607637692928MCMC19igraph0.00510936911063866Graphs (the combinatorial objects)20akima0.00448891508477221Interpolation of irregularly spaced data 21rgl0.004486970357506453D graphics (openGL)22rJava0.00419658010963776Interface with Java23RColorBrewer0.00405898916813389Palette generations24ape0.00401423956752348Phylogenetics25gtools0.00390068663688166Functions that didn&#39;t fit anywhere else, including macros26nnet0.00372527822413159Neural networks27quadprog0.00346928434614538Quadratic programmin28boot0.00339455733075856Bootstrap29Hmisc0.00321230956674779Yet another miscellaneous package30car0.00306687776780923Companion to the Applied Regression book31lme40.00299902494303813Linear mixed-effects models 32foreign0.00299020969373986Data compatibility33Rcpp0.00294488173058946R C++ integration34robustbase0.00292512759045668Robust statistics35zoo0.00291360656774946Regular and irregular Time Series36ggplot20.00280061452368686Graphics37iterators0.00271022721728954Iterators38XML0.00268297000192895XML39plyr0.00260013798376819In-memory data transformations40statmod0.00255576796128438Statistical modeling41tkrplot0.00253629634469558Plots as tk widgets42timeDate0.00241854401215965Time and date43fields0.00229020477891645Spatial data fitting44R.oo0.00224897565304714Object oriented programming45futile.paradigm0.00208727007738248Functional programming46abind0.00203562002853031Multidimensional&nbsp;array manipulation47rscproxy0.00199899977662843Interface to third party applications48scatterplot3d0.001949822791229353D scatter plot49distr0.00193739059491831Object oriented distributions50codetools0.00190284811878283Code analysis51corpcor0.00187713924111935Efficient Estimation of Covariance and (Partial) Correlation 52numDeriv0.00186866167837909Numerical derivatives53gdata0.00186445901204259Data manipulation54emulator0.00186390193431536Bayesian emulation of computer programs 55KernSmooth0.00183629272694307Kernel smoothing56mgcv0.00182832116584045Generalized ridge regression57ade40.00182738399748524Analysis of ecological data58foreach0.00182632366989875Alternative looping construct59e10710.00178029575562234Support material for a class60splus2R0.00176824350296979Support for porting from Splus61plotrix0.00174576155295491More graphics62RGtk20.00172084829088438GUI building with GTK63mclust0.00171720012190246Model-based clustering64colorspace0.00170618665568823Color Space manipulation65rgdal0.00169086925766161Geospatial data processing66gWidgets0.00167347646713519GUI building67tools0.00166343776456814Tools for package development68DBI0.0016518953743629969class0.0016366931624653970snow0.0016358147556272571tframe0.0016202615072740272pcaPP0.0016155219909075473stats40.0015818492897930974vegan0.0015771998028149475timeSeries0.0015571860156293976rgenoud0.0015568411251207477reshape0.0015539630949749478RCurl0.0015130768369441379rpart0.0015019988168796880Rcmdr0.0014943207134398781locfit0.0014648250219192582RJSONIO0.0014606070772627683maxLik0.0014505564252632684startupmsg0.001444551532544985deSolve0.0014310187966129986tseries0.0014033638912416187gamlss0.0013966965780655888lars0.0013914243575720989caTools0.0013767679661726490R.utils0.0013407020810474191genetics0.0013380196842376992proto0.0013258892631500593np0.0013201794485854194spatstat0.0013106670041273195MCMCpack0.0012754992725568296maptools0.0012727709563812897rrcov0.0012691993656958298lpSolve0.0012550281160938499RcppArmadillo0.00125049110788447100copula0.00122860896379617",
+    "url": "http://piccolboni.info/2012/05/essential-r-packages.html"
+  }
+</script>
+<!-- End Jekyll SEO tag -->
+</head>
+
+
+  <body>
+
+    <header class="site-header">
+
+  <div class="wrapper">
+
+    <a class="site-title" href="/">Antonio Piccolboni</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg viewBox="0 0 18 15">
+          <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+
+      <div class="trigger">
+        
+          
+          <a class="page-link" href="/about">About me</a>
+          
+        
+          
+        
+          
+        
+          
+        
+          
+          <a class="page-link" href="/contact">Contact</a>
+          
+        
+          
+        
+          
+        
+          
+          <a class="page-link" href="/projects">Projects</a>
+          
+        
+          
+        
+          
+          <a class="page-link" href="/speaking">Speaking</a>
+          
+        
+          
+          <a class="page-link" href="/writing">Writing</a>
+          
+        
+        <a class="page-link" href="https://feedburner.google.com/fb/a/mailverify?uri=piccolboni/qdqo&amp;loc=en_US">Subscribe</a>
+      </div>
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <div class="page-content">
+      <div class="wrapper">
+        <div class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">The essential R packages</h1>
+    <p class="post-meta">May 10, 2012</p>
+  </header>
+
+  <article class="post-content">
+    <div class='post'>
+Much has been said about the richness of the system of packages for R, but where is one supposed to start?  <br /><!--more--><a name='more'></a>The availability of a wide variety of packages has been long highlighted as one of the strengths of the R language. But the number is overwhelming — 5000 is the last I've heard and the growth is exponential — and the quality variable. When I talk about quality, I don't mean only "difficult to use", "buggy" or "slow", albeit that happens too. I also mean that some packages offer fundamental abstractions that you are likely to want in your toolset for one reason or another, whereas others have more specific goals, for instance they implement a specialized class of models or are companions for books and classes and so forth. &nbsp;Like other developers, I could just list and praise the ones I use or one could go for the crowdsourced solution of crantastic. Here I would like to suggest a data-driven approach based on the dependencies between packages and graph analysis. A package listed by another as a dependency can be seen as receiving an&nbsp;endorsement of sorts from the developers of the dependent package. After all, they have decided that using that package is better than the alternatives. Also, endorsement from authors of very important package can be seen as carrying more weight than the same for lesser packages. You can guess here a recursive definition whereby being an important package means being a dependency for other important packages. &nbsp;If one considers the graph with packages as vertices and dependencies as directed edges, one can recognize the familiar notion of page rank made popular by Google, whereby important sites are linked to by other important sites. So after some CRAN scraping (the data set is a little old, like 12/2011) and using the package igraph and specifically the page.rank function, here are the top 100 dependency-ranked packages. I entered a brief description by hand for about the first half, then run out of steam. Maybe we need a data-driven solution also for that task.&nbsp;Enjoy.<br /><br /><br /><table><tbody><tr><td>1</td><td>stats</td><td>0.0962312835109951</td><td>Distributions and other basic statistical stuff</td></tr><tr><td>2</td><td>methods</td><td>0.0732606540057392</td><td>Object oriented programming</td></tr><tr><td>3</td><td>graphics</td><td>0.0536687309266182</td><td>Of course, graphics</td></tr><tr><td>4</td><td>MASS</td><td>0.0283011225469996</td><td>Supporting material for Modern Applied Statistics with S</td></tr><tr><td>5</td><td>grDevices</td><td>0.0281639967024237</td><td>Graphical devices</td></tr><tr><td>6</td><td>utils</td><td>0.0224799288855229</td><td>In a snub to modularity, a little bit of everything, but very useful</td></tr><tr><td>7</td><td>lattice</td><td>0.0163861320305732</td><td>graphics</td></tr><tr><td>8</td><td>grid</td><td>0.0126373607888249</td><td>more graphics</td></tr><tr><td>9</td><td>Matrix</td><td>0.0115594712568376</td><td>Matrices</td></tr><tr><td>10</td><td>mvtnorm</td><td>0.0108335460953897</td><td>Multivariate Normal and t Distributions </td></tr><tr><td>11</td><td>sp</td><td>0.00916721059561437</td><td>Spatial data</td></tr><tr><td>12</td><td>tcltk</td><td>0.00885654936181036</td><td>GUI development</td></tr><tr><td>13</td><td>splines</td><td>0.00871777304117854</td><td>Needless to say, splines</td></tr><tr><td>14</td><td>nlme</td><td>0.00603233299532761</td><td>Mixed effects models</td></tr><tr><td>15</td><td>survival</td><td>0.00590245542213706</td><td>Survival analysis</td></tr><tr><td>16</td><td>cluster</td><td>0.00569050414061241</td><td>Clustering</td></tr><tr><td>17</td><td>R.methodsS3</td><td>0.00536103360510169</td><td>Object oriented programming</td></tr><tr><td>18</td><td>coda</td><td>0.00525607637692928</td><td>MCMC</td></tr><tr><td>19</td><td>igraph</td><td>0.00510936911063866</td><td>Graphs (the combinatorial objects)</td></tr><tr><td>20</td><td>akima</td><td>0.00448891508477221</td><td>Interpolation of irregularly spaced data </td></tr><tr><td>21</td><td>rgl</td><td>0.00448697035750645</td><td>3D graphics (openGL)</td></tr><tr><td>22</td><td>rJava</td><td>0.00419658010963776</td><td>Interface with Java</td></tr><tr><td>23</td><td>RColorBrewer</td><td>0.00405898916813389</td><td>Palette generations</td></tr><tr><td>24</td><td>ape</td><td>0.00401423956752348</td><td>Phylogenetics</td></tr><tr><td>25</td><td>gtools</td><td>0.00390068663688166</td><td>Functions that didn't fit anywhere else, including macros</td></tr><tr><td>26</td><td>nnet</td><td>0.00372527822413159</td><td>Neural networks</td></tr><tr><td>27</td><td>quadprog</td><td>0.00346928434614538</td><td>Quadratic programmin</td></tr><tr><td>28</td><td>boot</td><td>0.00339455733075856</td><td>Bootstrap</td></tr><tr><td>29</td><td>Hmisc</td><td>0.00321230956674779</td><td>Yet another miscellaneous package</td></tr><tr><td>30</td><td>car</td><td>0.00306687776780923</td><td>Companion to the Applied Regression book</td></tr><tr><td>31</td><td>lme4</td><td>0.00299902494303813</td><td>Linear mixed-effects models </td></tr><tr><td>32</td><td>foreign</td><td>0.00299020969373986</td><td>Data compatibility</td></tr><tr><td>33</td><td>Rcpp</td><td>0.00294488173058946</td><td>R C++ integration</td></tr><tr><td>34</td><td>robustbase</td><td>0.00292512759045668</td><td>Robust statistics</td></tr><tr><td>35</td><td>zoo</td><td>0.00291360656774946</td><td>Regular and irregular Time Series</td></tr><tr><td>36</td><td>ggplot2</td><td>0.00280061452368686</td><td>Graphics</td></tr><tr><td>37</td><td>iterators</td><td>0.00271022721728954</td><td>Iterators</td></tr><tr><td>38</td><td>XML</td><td>0.00268297000192895</td><td>XML</td></tr><tr><td>39</td><td>plyr</td><td>0.00260013798376819</td><td>In-memory data transformations</td></tr><tr><td>40</td><td>statmod</td><td>0.00255576796128438</td><td>Statistical modeling</td></tr><tr><td>41</td><td>tkrplot</td><td>0.00253629634469558</td><td>Plots as tk widgets</td></tr><tr><td>42</td><td>timeDate</td><td>0.00241854401215965</td><td>Time and date</td></tr><tr><td>43</td><td>fields</td><td>0.00229020477891645</td><td>Spatial data fitting</td></tr><tr><td>44</td><td>R.oo</td><td>0.00224897565304714</td><td>Object oriented programming</td></tr><tr><td>45</td><td>futile.paradigm</td><td>0.00208727007738248</td><td>Functional programming</td></tr><tr><td>46</td><td>abind</td><td>0.00203562002853031</td><td>Multidimensional&nbsp;array manipulation</td></tr><tr><td>47</td><td>rscproxy</td><td>0.00199899977662843</td><td>Interface to third party applications</td></tr><tr><td>48</td><td>scatterplot3d</td><td>0.00194982279122935</td><td>3D scatter plot</td></tr><tr><td>49</td><td>distr</td><td>0.00193739059491831</td><td>Object oriented distributions</td></tr><tr><td>50</td><td>codetools</td><td>0.00190284811878283</td><td>Code analysis</td></tr><tr><td>51</td><td>corpcor</td><td>0.00187713924111935</td><td>Efficient Estimation of Covariance and (Partial) Correlation </td></tr><tr><td>52</td><td>numDeriv</td><td>0.00186866167837909</td><td>Numerical derivatives</td></tr><tr><td>53</td><td>gdata</td><td>0.00186445901204259</td><td>Data manipulation</td></tr><tr><td>54</td><td>emulator</td><td>0.00186390193431536</td><td>Bayesian emulation of computer programs </td></tr><tr><td>55</td><td>KernSmooth</td><td>0.00183629272694307</td><td>Kernel smoothing</td></tr><tr><td>56</td><td>mgcv</td><td>0.00182832116584045</td><td>Generalized ridge regression</td></tr><tr><td>57</td><td>ade4</td><td>0.00182738399748524</td><td>Analysis of ecological data</td></tr><tr><td>58</td><td>foreach</td><td>0.00182632366989875</td><td>Alternative looping construct</td></tr><tr><td>59</td><td>e1071</td><td>0.00178029575562234</td><td>Support material for a class</td></tr><tr><td>60</td><td>splus2R</td><td>0.00176824350296979</td><td>Support for porting from Splus</td></tr><tr><td>61</td><td>plotrix</td><td>0.00174576155295491</td><td>More graphics</td></tr><tr><td>62</td><td>RGtk2</td><td>0.00172084829088438</td><td>GUI building with GTK</td></tr><tr><td>63</td><td>mclust</td><td>0.00171720012190246</td><td>Model-based clustering</td></tr><tr><td>64</td><td>colorspace</td><td>0.00170618665568823</td><td>Color Space manipulation</td></tr><tr><td>65</td><td>rgdal</td><td>0.00169086925766161</td><td>Geospatial data processing</td></tr><tr><td>66</td><td>gWidgets</td><td>0.00167347646713519</td><td>GUI building</td></tr><tr><td>67</td><td>tools</td><td>0.00166343776456814</td><td>Tools for package development</td></tr><tr><td>68</td><td>DBI</td><td>0.00165189537436299</td><td></td></tr><tr><td>69</td><td>class</td><td>0.00163669316246539</td><td></td></tr><tr><td>70</td><td>snow</td><td>0.00163581475562725</td><td></td></tr><tr><td>71</td><td>tframe</td><td>0.00162026150727402</td><td></td></tr><tr><td>72</td><td>pcaPP</td><td>0.00161552199090754</td><td></td></tr><tr><td>73</td><td>stats4</td><td>0.00158184928979309</td><td></td></tr><tr><td>74</td><td>vegan</td><td>0.00157719980281494</td><td></td></tr><tr><td>75</td><td>timeSeries</td><td>0.00155718601562939</td><td></td></tr><tr><td>76</td><td>rgenoud</td><td>0.00155684112512074</td><td></td></tr><tr><td>77</td><td>reshape</td><td>0.00155396309497494</td><td></td></tr><tr><td>78</td><td>RCurl</td><td>0.00151307683694413</td><td></td></tr><tr><td>79</td><td>rpart</td><td>0.00150199881687968</td><td></td></tr><tr><td>80</td><td>Rcmdr</td><td>0.00149432071343987</td><td></td></tr><tr><td>81</td><td>locfit</td><td>0.00146482502191925</td><td></td></tr><tr><td>82</td><td>RJSONIO</td><td>0.00146060707726276</td><td></td></tr><tr><td>83</td><td>maxLik</td><td>0.00145055642526326</td><td></td></tr><tr><td>84</td><td>startupmsg</td><td>0.0014445515325449</td><td></td></tr><tr><td>85</td><td>deSolve</td><td>0.00143101879661299</td><td></td></tr><tr><td>86</td><td>tseries</td><td>0.00140336389124161</td><td></td></tr><tr><td>87</td><td>gamlss</td><td>0.00139669657806558</td><td></td></tr><tr><td>88</td><td>lars</td><td>0.00139142435757209</td><td></td></tr><tr><td>89</td><td>caTools</td><td>0.00137676796617264</td><td></td></tr><tr><td>90</td><td>R.utils</td><td>0.00134070208104741</td><td></td></tr><tr><td>91</td><td>genetics</td><td>0.00133801968423769</td><td></td></tr><tr><td>92</td><td>proto</td><td>0.00132588926315005</td><td></td></tr><tr><td>93</td><td>np</td><td>0.00132017944858541</td><td></td></tr><tr><td>94</td><td>spatstat</td><td>0.00131066700412731</td><td></td></tr><tr><td>95</td><td>MCMCpack</td><td>0.00127549927255682</td><td></td></tr><tr><td>96</td><td>maptools</td><td>0.00127277095638128</td><td></td></tr><tr><td>97</td><td>rrcov</td><td>0.00126919936569582</td><td></td></tr><tr><td>98</td><td>lpSolve</td><td>0.00125502811609384</td><td></td></tr><tr><td>99</td><td>RcppArmadillo</td><td>0.00125049110788447</td><td></td></tr><tr><td>100</td><td>copula</td><td>0.00122860896379617</td><td></td></tr></tbody></table></div>
+
+  </article>
+
+  <div class="SendComment">
+    <a href="mailto:antonio@piccolboni.info?subject=The essential R packages&body=http://piccolboni.info/2012/05/essential-r-packages.html" target="_top">Email the author</a> or <a href="http://via.hypothes.is/http://piccolboni.info//2012/05/essential-r-packages.html">annotate with hypothes.is</a>
+  </div>
+  <div id="disqus_thread"></div>
+<script>
+
+/**
+ *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+ *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables */
+
+var disqus_config = function () {
+    this.page.url = "http://piccolboni.info//2012/05/essential-r-packages.html";
+    this.page.identifier = "/2012/05/essential-r-packages";
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+    var d = document, s = d.createElement('script');
+    s.src = '//piccolbo.disqus.com/embed.js';
+    s.setAttribute('data-timestamp', +new Date());
+    (d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+</div>
+
+      </div>
+    </div>
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <div class="PageNavigation">
+      
+        <a class="prev" href="/2011/12/mapreduce-everywhere.html">&laquo;    Mapreduce everywhere</a>
+      
+      
+        <a class="next" href="/2012/10/r-anti-tips.html">R anti-tips  &raquo;</a>
+      
+    </div>
+
+  </div>
+
+</footer>
+
+    <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-7018175-5', 'piccolboni.info');
+  ga('send', 'pageview');
+
+</script>
+
+  </body>
+
+</html>

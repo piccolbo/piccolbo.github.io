@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Delicious R Curry</title>
+  <meta name="description" content="In R, functional::Curry is a misnomer at best. Let’s implement currying in R.I’ve always wondered why the function Curry in package functional for the langua...">
+
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="canonical" href="http://piccolboni.info/2015/07/delicious-r-curry.html">
+  <link rel="alternate" type="application/rss+xml" title="Antonio Piccolboni" href="http://piccolboni.info/atom.xml" />
+  <link rel="shortcut icon" type="image/png" href="gravatar32.png?v=3">
+  <script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+  </script>
+  <!-- Begin Jekyll SEO tag v1.4.0 -->
+<title>Delicious R Curry - Antonio Piccolboni</title>
+<meta property="og:title" content="Delicious R Curry" />
+<meta name="description" content="In R, functional::Curry is a misnomer at best. Let’s implement currying in R.I’ve always wondered why the function Curry in package functional for the language R is named that way when it actually implements partial application. What it does is transfroming a function into another one with a smaller number of arguments, which is very useful when a program contains several calls to the same function with some arguments varying and some fixed. Instead of cutting and pasting them, a no-no of ascetic programming, we can create a function that doesn’t need these repetitive arguments via partial application.Let’s say you want to simulate dice throwing. You can define a dice function:suppressMessages(library(bettR))dice = function(size) sample(1:6, size)dice(3)# [1] 4 3 2Or you can use partial application:dice = partial(sample, 1:6)dice(3)# [1] 4 1 3The advantage of the latter may not be obvious when there are so few arguments involved. But you may have noticed that in the first case we had to write size twice, with the only goal of forwarding the argument from the dice function to sample. If we wanted to model biased dice, we would have to forward also the prob argument, and so on for every other argument that’s not applied to right away. With partial, we are just specifying the value of some arguments and let the other “pass through” with no red-tape.Currying uses partial application to the extreme, if you wish, transforming a function of many arguments into a function of a single argument, that returns a function of a single argument … until the last function which returns whatever value. It allows to write f(1,2,3) as curry(f)(1)(2)(3). Is that useful for programming? The evidence is in favor of a positive answer. If partial application is useful, curried functions make partial application seamless. For instance (* 5) is a function in Haskell implementing multiplication by 5 of its single argument. * is a function of two arguments but is also implicitly curried – provide one argument and you get a function of the remaining one. Scala also allows to define methods with multiple argument lists, that is curried functions (it actually is a generalization of the concept). That said, one can make a reasonable living programming without ever currying a single function. Nonetheless, implementing currying for any language is a great exercise in functional programming.Partial applicationWhile partial application is not currying, it’s a first step. If we have a function with many arguments and we can remove one, we are one step closer to a function of a single argument. As we discussed at the beginning, R has a function called Curry that performs partial application. Unfortunately, Curry also zaps the argument list which becomes only .... While it seems reasonable to expect a function of n arguments to have n − 1 arguments upon partial application to a single argument, Curry makes that a variable number. So does function partial in packages purrr and pryr. Not only it’s nice to have a list of arguments for argument checking, documentation and automatic completion, but, with the specific goal of implementing currying, we need to remove arguments one at a time. Once we have the single ... argument, we are stuck. So I gave it a shot and the result is the following.bettR::partialfunction(f, ..., .args = alist()) {    #get  args to apply f to first from ... and .args via matching    .applied =      as.list(        match.call(          f,          make_call(&quot;f&quot;, c(dots(...), .args))))[-1]    #rest to be applied to later    formf = formals(f)    ii = discard(match(names(.applied), names(formf)), is.na)    ii = if(length(ii) &gt; 0) -ii else TRUE    .unapplied = formf[ii]    #make function of later args    pf = parent.frame()    make_function(      .unapplied,      make_call(        f,        c(.applied, lapply(names(.unapplied), as.name))),      env = pf)}&lt;environment: namespace:bettR&gt;It may look simple and hopefully it is, but there was a certain amount of trial-and-error and research involved to take care of both standard and non-standard evaluation and named and unnamed arguments. I can’t exclude I have overlooked something, but here are some examples.ff = function(a, b, c) list(a, b, c)pff = partial(ff, a = 1)pff# function (b, c) # (function (a, b, c) # list(a, b, c))(a = 1, b, c)pff(c = 3, 2) #named and unnamed# [[1]]# [1] 1# # [[2]]# [1] 2# # [[3]]# [1] 3suppressMessages(library(dplyr))ff = partial(select, mtcars, mpg) #one lazy and one regular argumentff# function (...) # (function (.data, ...) # {#     select_(.data, .dots = lazyeval::lazy_dots(...))# })(.data = mtcars, mpg, ...)ff(carb)[1:5, ]#                    mpg carb# Mazda RX4         21.0    4# Mazda RX4 Wag     21.0    4# Datsun 710        22.8    1# Hornet 4 Drive    21.4    1# Hornet Sportabout 18.7    2From partial to curryLet’s say we want to curry function ff. The general plan is to build a function of the first argument of ff that uses partial to lock the first argument of ff to the value of its only argument and then, recursively, calls curry on the function thus created. Eventually, we are left with a function of a single argument, which we can return as is. The special case for the ... argument and a zero-argument invocation is explained later.bettR::curryfunction(f) {    formf = formals(f)    lff = length(formf)    if(lff == 0 || (lff == 1 &amp;&amp; names(formf) != &quot;...&quot;))      f    else {      make_function(        formf[1],        quote({          args = arglist(lazy = TRUE)          if(length(args) &gt; 0)            curry(              partial(                f,                .args = args))          else            f()}))}}&lt;environment: namespace:bettR&gt;ff = function(a,b,c ) list(a,b,c)cuff = curry(ff)cuff(1)# function (b) # {#     args = arglist(lazy = TRUE)#     if (length(args) &gt; 0) #         curry(partial(f, .args = args))#     else f()# }# &lt;environment: 0x7f87e0c82f08&gt;cuff(1)(2)# function (c) # (function (b, c) # (function (a, b, c) # list(a, b, c))(a = 1, b, c))(b = 2, c)# &lt;environment: 0x7f87e10ddaa0&gt;cuff(1)(2)(3)# [[1]]# [1] 1# # [[2]]# [1] 2# # [[3]]# [1] 3And there you have it, hot delicious R curry! With the ... argument it’s harder to decide when to stop the recursion. I decided to extend currying to that case by ending the sequence of application with a zero-argument call, that iscurry(select)(mtcars)(mpg)(carb)(disp)# function (...) # {#     args = arglist(lazy = TRUE)#     if (length(args) &gt; 0) #         curry(partial(f, .args = args))#     else f()# }# &lt;environment: 0x7f87e324dd40&gt;curry(select)(mtcars)(mpg)(carb)(disp)()[1:5, ] #                    mpg carb disp# Mazda RX4         21.0    4  160# Mazda RX4 Wag     21.0    4  160# Datsun 710        22.8    1  108# Hornet 4 Drive    21.4    1  258# Hornet Sportabout 18.7    2  360If you wonder what the bettR package is, where this delicious stuff is cooking, it’s my playground of ideas to make R into a better language. It’s on github but I need to warn you that it’s in “research” mode and it’s not ready for either prime or subprime time." />
+<meta property="og:description" content="In R, functional::Curry is a misnomer at best. Let’s implement currying in R.I’ve always wondered why the function Curry in package functional for the language R is named that way when it actually implements partial application. What it does is transfroming a function into another one with a smaller number of arguments, which is very useful when a program contains several calls to the same function with some arguments varying and some fixed. Instead of cutting and pasting them, a no-no of ascetic programming, we can create a function that doesn’t need these repetitive arguments via partial application.Let’s say you want to simulate dice throwing. You can define a dice function:suppressMessages(library(bettR))dice = function(size) sample(1:6, size)dice(3)# [1] 4 3 2Or you can use partial application:dice = partial(sample, 1:6)dice(3)# [1] 4 1 3The advantage of the latter may not be obvious when there are so few arguments involved. But you may have noticed that in the first case we had to write size twice, with the only goal of forwarding the argument from the dice function to sample. If we wanted to model biased dice, we would have to forward also the prob argument, and so on for every other argument that’s not applied to right away. With partial, we are just specifying the value of some arguments and let the other “pass through” with no red-tape.Currying uses partial application to the extreme, if you wish, transforming a function of many arguments into a function of a single argument, that returns a function of a single argument … until the last function which returns whatever value. It allows to write f(1,2,3) as curry(f)(1)(2)(3). Is that useful for programming? The evidence is in favor of a positive answer. If partial application is useful, curried functions make partial application seamless. For instance (* 5) is a function in Haskell implementing multiplication by 5 of its single argument. * is a function of two arguments but is also implicitly curried – provide one argument and you get a function of the remaining one. Scala also allows to define methods with multiple argument lists, that is curried functions (it actually is a generalization of the concept). That said, one can make a reasonable living programming without ever currying a single function. Nonetheless, implementing currying for any language is a great exercise in functional programming.Partial applicationWhile partial application is not currying, it’s a first step. If we have a function with many arguments and we can remove one, we are one step closer to a function of a single argument. As we discussed at the beginning, R has a function called Curry that performs partial application. Unfortunately, Curry also zaps the argument list which becomes only .... While it seems reasonable to expect a function of n arguments to have n − 1 arguments upon partial application to a single argument, Curry makes that a variable number. So does function partial in packages purrr and pryr. Not only it’s nice to have a list of arguments for argument checking, documentation and automatic completion, but, with the specific goal of implementing currying, we need to remove arguments one at a time. Once we have the single ... argument, we are stuck. So I gave it a shot and the result is the following.bettR::partialfunction(f, ..., .args = alist()) {    #get  args to apply f to first from ... and .args via matching    .applied =      as.list(        match.call(          f,          make_call(&quot;f&quot;, c(dots(...), .args))))[-1]    #rest to be applied to later    formf = formals(f)    ii = discard(match(names(.applied), names(formf)), is.na)    ii = if(length(ii) &gt; 0) -ii else TRUE    .unapplied = formf[ii]    #make function of later args    pf = parent.frame()    make_function(      .unapplied,      make_call(        f,        c(.applied, lapply(names(.unapplied), as.name))),      env = pf)}&lt;environment: namespace:bettR&gt;It may look simple and hopefully it is, but there was a certain amount of trial-and-error and research involved to take care of both standard and non-standard evaluation and named and unnamed arguments. I can’t exclude I have overlooked something, but here are some examples.ff = function(a, b, c) list(a, b, c)pff = partial(ff, a = 1)pff# function (b, c) # (function (a, b, c) # list(a, b, c))(a = 1, b, c)pff(c = 3, 2) #named and unnamed# [[1]]# [1] 1# # [[2]]# [1] 2# # [[3]]# [1] 3suppressMessages(library(dplyr))ff = partial(select, mtcars, mpg) #one lazy and one regular argumentff# function (...) # (function (.data, ...) # {#     select_(.data, .dots = lazyeval::lazy_dots(...))# })(.data = mtcars, mpg, ...)ff(carb)[1:5, ]#                    mpg carb# Mazda RX4         21.0    4# Mazda RX4 Wag     21.0    4# Datsun 710        22.8    1# Hornet 4 Drive    21.4    1# Hornet Sportabout 18.7    2From partial to curryLet’s say we want to curry function ff. The general plan is to build a function of the first argument of ff that uses partial to lock the first argument of ff to the value of its only argument and then, recursively, calls curry on the function thus created. Eventually, we are left with a function of a single argument, which we can return as is. The special case for the ... argument and a zero-argument invocation is explained later.bettR::curryfunction(f) {    formf = formals(f)    lff = length(formf)    if(lff == 0 || (lff == 1 &amp;&amp; names(formf) != &quot;...&quot;))      f    else {      make_function(        formf[1],        quote({          args = arglist(lazy = TRUE)          if(length(args) &gt; 0)            curry(              partial(                f,                .args = args))          else            f()}))}}&lt;environment: namespace:bettR&gt;ff = function(a,b,c ) list(a,b,c)cuff = curry(ff)cuff(1)# function (b) # {#     args = arglist(lazy = TRUE)#     if (length(args) &gt; 0) #         curry(partial(f, .args = args))#     else f()# }# &lt;environment: 0x7f87e0c82f08&gt;cuff(1)(2)# function (c) # (function (b, c) # (function (a, b, c) # list(a, b, c))(a = 1, b, c))(b = 2, c)# &lt;environment: 0x7f87e10ddaa0&gt;cuff(1)(2)(3)# [[1]]# [1] 1# # [[2]]# [1] 2# # [[3]]# [1] 3And there you have it, hot delicious R curry! With the ... argument it’s harder to decide when to stop the recursion. I decided to extend currying to that case by ending the sequence of application with a zero-argument call, that iscurry(select)(mtcars)(mpg)(carb)(disp)# function (...) # {#     args = arglist(lazy = TRUE)#     if (length(args) &gt; 0) #         curry(partial(f, .args = args))#     else f()# }# &lt;environment: 0x7f87e324dd40&gt;curry(select)(mtcars)(mpg)(carb)(disp)()[1:5, ] #                    mpg carb disp# Mazda RX4         21.0    4  160# Mazda RX4 Wag     21.0    4  160# Datsun 710        22.8    1  108# Hornet 4 Drive    21.4    1  258# Hornet Sportabout 18.7    2  360If you wonder what the bettR package is, where this delicious stuff is cooking, it’s my playground of ideas to make R into a better language. It’s on github but I need to warn you that it’s in “research” mode and it’s not ready for either prime or subprime time." />
+<link rel="canonical" href="http://piccolboni.info/2015/07/delicious-r-curry.html" />
+<meta property="og:url" content="http://piccolboni.info/2015/07/delicious-r-curry.html" />
+<meta property="og:site_name" content="Antonio Piccolboni" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2015-07-21T20:38:00-07:00" />
+<link rel="next" href="http://piccolboni.info/2015/09/syntax-directed-diffs-for-R-in-R.html" title="Syntax Directed Diffs for R in R" />
+<link rel="prev" href="http://piccolboni.info/2014/08/10-eigenmaps-of-the-united-states-of-america.html" title="10 eigenmaps of the United States of America" />
+<script type="application/ld+json">
+  {
+    "@context": "http://schema.org",
+    "@type": "BlogPosting",
+    "headline": "Delicious R Curry",
+    "datePublished": "2015-07-21T20:38:00-07:00",
+    "description": "In R, functional::Curry is a misnomer at best. Let’s implement currying in R.I’ve always wondered why the function Curry in package functional for the language R is named that way when it actually implements partial application. What it does is transfroming a function into another one with a smaller number of arguments, which is very useful when a program contains several calls to the same function with some arguments varying and some fixed. Instead of cutting and pasting them, a no-no of ascetic programming, we can create a function that doesn’t need these repetitive arguments via partial application.Let’s say you want to simulate dice throwing. You can define a dice function:suppressMessages(library(bettR))dice = function(size) sample(1:6, size)dice(3)# [1] 4 3 2Or you can use partial application:dice = partial(sample, 1:6)dice(3)# [1] 4 1 3The advantage of the latter may not be obvious when there are so few arguments involved. But you may have noticed that in the first case we had to write size twice, with the only goal of forwarding the argument from the dice function to sample. If we wanted to model biased dice, we would have to forward also the prob argument, and so on for every other argument that’s not applied to right away. With partial, we are just specifying the value of some arguments and let the other “pass through” with no red-tape.Currying uses partial application to the extreme, if you wish, transforming a function of many arguments into a function of a single argument, that returns a function of a single argument … until the last function which returns whatever value. It allows to write f(1,2,3) as curry(f)(1)(2)(3). Is that useful for programming? The evidence is in favor of a positive answer. If partial application is useful, curried functions make partial application seamless. For instance (* 5) is a function in Haskell implementing multiplication by 5 of its single argument. * is a function of two arguments but is also implicitly curried – provide one argument and you get a function of the remaining one. Scala also allows to define methods with multiple argument lists, that is curried functions (it actually is a generalization of the concept). That said, one can make a reasonable living programming without ever currying a single function. Nonetheless, implementing currying for any language is a great exercise in functional programming.Partial applicationWhile partial application is not currying, it’s a first step. If we have a function with many arguments and we can remove one, we are one step closer to a function of a single argument. As we discussed at the beginning, R has a function called Curry that performs partial application. Unfortunately, Curry also zaps the argument list which becomes only .... While it seems reasonable to expect a function of n arguments to have n − 1 arguments upon partial application to a single argument, Curry makes that a variable number. So does function partial in packages purrr and pryr. Not only it’s nice to have a list of arguments for argument checking, documentation and automatic completion, but, with the specific goal of implementing currying, we need to remove arguments one at a time. Once we have the single ... argument, we are stuck. So I gave it a shot and the result is the following.bettR::partialfunction(f, ..., .args = alist()) {    #get  args to apply f to first from ... and .args via matching    .applied =      as.list(        match.call(          f,          make_call(&quot;f&quot;, c(dots(...), .args))))[-1]    #rest to be applied to later    formf = formals(f)    ii = discard(match(names(.applied), names(formf)), is.na)    ii = if(length(ii) &gt; 0) -ii else TRUE    .unapplied = formf[ii]    #make function of later args    pf = parent.frame()    make_function(      .unapplied,      make_call(        f,        c(.applied, lapply(names(.unapplied), as.name))),      env = pf)}&lt;environment: namespace:bettR&gt;It may look simple and hopefully it is, but there was a certain amount of trial-and-error and research involved to take care of both standard and non-standard evaluation and named and unnamed arguments. I can’t exclude I have overlooked something, but here are some examples.ff = function(a, b, c) list(a, b, c)pff = partial(ff, a = 1)pff# function (b, c) # (function (a, b, c) # list(a, b, c))(a = 1, b, c)pff(c = 3, 2) #named and unnamed# [[1]]# [1] 1# # [[2]]# [1] 2# # [[3]]# [1] 3suppressMessages(library(dplyr))ff = partial(select, mtcars, mpg) #one lazy and one regular argumentff# function (...) # (function (.data, ...) # {#     select_(.data, .dots = lazyeval::lazy_dots(...))# })(.data = mtcars, mpg, ...)ff(carb)[1:5, ]#                    mpg carb# Mazda RX4         21.0    4# Mazda RX4 Wag     21.0    4# Datsun 710        22.8    1# Hornet 4 Drive    21.4    1# Hornet Sportabout 18.7    2From partial to curryLet’s say we want to curry function ff. The general plan is to build a function of the first argument of ff that uses partial to lock the first argument of ff to the value of its only argument and then, recursively, calls curry on the function thus created. Eventually, we are left with a function of a single argument, which we can return as is. The special case for the ... argument and a zero-argument invocation is explained later.bettR::curryfunction(f) {    formf = formals(f)    lff = length(formf)    if(lff == 0 || (lff == 1 &amp;&amp; names(formf) != &quot;...&quot;))      f    else {      make_function(        formf[1],        quote({          args = arglist(lazy = TRUE)          if(length(args) &gt; 0)            curry(              partial(                f,                .args = args))          else            f()}))}}&lt;environment: namespace:bettR&gt;ff = function(a,b,c ) list(a,b,c)cuff = curry(ff)cuff(1)# function (b) # {#     args = arglist(lazy = TRUE)#     if (length(args) &gt; 0) #         curry(partial(f, .args = args))#     else f()# }# &lt;environment: 0x7f87e0c82f08&gt;cuff(1)(2)# function (c) # (function (b, c) # (function (a, b, c) # list(a, b, c))(a = 1, b, c))(b = 2, c)# &lt;environment: 0x7f87e10ddaa0&gt;cuff(1)(2)(3)# [[1]]# [1] 1# # [[2]]# [1] 2# # [[3]]# [1] 3And there you have it, hot delicious R curry! With the ... argument it’s harder to decide when to stop the recursion. I decided to extend currying to that case by ending the sequence of application with a zero-argument call, that iscurry(select)(mtcars)(mpg)(carb)(disp)# function (...) # {#     args = arglist(lazy = TRUE)#     if (length(args) &gt; 0) #         curry(partial(f, .args = args))#     else f()# }# &lt;environment: 0x7f87e324dd40&gt;curry(select)(mtcars)(mpg)(carb)(disp)()[1:5, ] #                    mpg carb disp# Mazda RX4         21.0    4  160# Mazda RX4 Wag     21.0    4  160# Datsun 710        22.8    1  108# Hornet 4 Drive    21.4    1  258# Hornet Sportabout 18.7    2  360If you wonder what the bettR package is, where this delicious stuff is cooking, it’s my playground of ideas to make R into a better language. It’s on github but I need to warn you that it’s in “research” mode and it’s not ready for either prime or subprime time.",
+    "url": "http://piccolboni.info/2015/07/delicious-r-curry.html"
+  }
+</script>
+<!-- End Jekyll SEO tag -->
+</head>
+
+
+  <body>
+
+    <header class="site-header">
+
+  <div class="wrapper">
+
+    <a class="site-title" href="/">Antonio Piccolboni</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg viewBox="0 0 18 15">
+          <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+
+      <div class="trigger">
+        
+          
+          <a class="page-link" href="/about">About me</a>
+          
+        
+          
+        
+          
+        
+          
+        
+          
+          <a class="page-link" href="/contact">Contact</a>
+          
+        
+          
+        
+          
+        
+          
+          <a class="page-link" href="/projects">Projects</a>
+          
+        
+          
+        
+          
+          <a class="page-link" href="/speaking">Speaking</a>
+          
+        
+          
+          <a class="page-link" href="/writing">Writing</a>
+          
+        
+        <a class="page-link" href="https://feedburner.google.com/fb/a/mailverify?uri=piccolboni/qdqo&amp;loc=en_US">Subscribe</a>
+      </div>
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <div class="page-content">
+      <div class="wrapper">
+        <div class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">Delicious R Curry</h1>
+    <p class="post-meta">Jul 21, 2015</p>
+  </header>
+
+  <article class="post-content">
+    <p>In R, <code>functional::Curry</code> is a misnomer at best. Let’s implement currying in R.</p>
+<!-- more -->
+<p>I’ve always wondered why the function <code>Curry</code> in package <code>functional</code> for the language R is named that way when it actually implements partial application. What it does is transfroming a function into another one with a smaller number of arguments, which is very useful when a program contains several calls to the same function with some arguments varying and some fixed. Instead of cutting and pasting them, a no-no of <a href="http://asceticprogrammer.info">ascetic programming</a>, we can create a function that doesn’t need these repetitive arguments via partial application.</p>
+<p>Let’s say you want to simulate dice throwing. You can define a <code>dice</code> function:</p>
+<pre class="r"><code>suppressMessages(library(bettR))
+dice = function(size) sample(1:6, size)
+dice(3)</code></pre>
+<pre><code># [1] 4 3 2</code></pre>
+<p>Or you can use partial application:</p>
+<pre class="r"><code>dice = partial(sample, 1:6)
+dice(3)</code></pre>
+<pre><code># [1] 4 1 3</code></pre>
+<p>The advantage of the latter may not be obvious when there are so few arguments involved. But you may have noticed that in the first case we had to write <code>size</code> twice, with the only goal of forwarding the argument from the <code>dice</code> function to <code>sample</code>. If we wanted to model biased dice, we would have to forward also the <code>prob</code> argument, and so on for every other argument that’s not applied to right away. With partial, we are just specifying the value of some arguments and let the other “pass through” with no red-tape.</p>
+<p>Currying uses partial application to the extreme, if you wish, transforming a function of many arguments into a function of a single argument, that returns a function of a single argument … until the last function which returns whatever value. It allows to write <code>f(1,2,3)</code> as <code>curry(f)(1)(2)(3)</code>. Is that useful for programming? The evidence is in favor of a positive answer. If partial application is useful, curried functions make partial application seamless. For instance <code>(* 5)</code> is a function in Haskell implementing multiplication by 5 of its single argument. <code>*</code> is a function of two arguments but is also implicitly curried – provide one argument and you get a function of the remaining one. Scala also allows to define methods with multiple argument lists, that is curried functions (it actually is a generalization of the concept). That said, one can make a reasonable living programming without ever currying a single function. Nonetheless, implementing currying for any language is a great exercise in functional programming.</p>
+<div id="partial-application" class="section level2">
+<h2>Partial application</h2>
+<p>While partial application is not currying, it’s a first step. If we have a function with many arguments and we can remove one, we are one step closer to a function of a single argument. As we discussed at the beginning, R has a function called <code>Curry</code> that performs partial application. Unfortunately, <code>Curry</code> also zaps the argument list which becomes only <code>...</code>. While it seems reasonable to expect a function of <span class="math"><em>n</em></span> arguments to have <span class="math"><em>n</em> − 1</span> arguments upon partial application to a single argument, <code>Curry</code> makes that a variable number. So does function <code>partial</code> in packages <code>purrr</code> and <code>pryr</code>. Not only it’s nice to have a list of arguments for argument checking, documentation and automatic completion, but, with the specific goal of implementing currying, we need to remove arguments one at a time. Once we have the single <code>...</code> argument, we are stuck. So I gave it a shot and the result is the following.</p>
+<pre class="r"><code>bettR::partial</code></pre>
+<pre><code>function(f, ..., .args = alist()) {
+    #get  args to apply f to first from ... and .args via matching
+    .applied =
+      as.list(
+        match.call(
+          f,
+          make_call(&quot;f&quot;, c(dots(...), .args))))[-1]
+    #rest to be applied to later
+    formf = formals(f)
+    ii = discard(match(names(.applied), names(formf)), is.na)
+    ii = if(length(ii) &gt; 0) -ii else TRUE
+    .unapplied = formf[ii]
+    #make function of later args
+    pf = parent.frame()
+    make_function(
+      .unapplied,
+      make_call(
+        f,
+        c(.applied, lapply(names(.unapplied), as.name))),
+      env = pf)}
+&lt;environment: namespace:bettR&gt;</code></pre>
+<p>It may look simple and hopefully it is, but there was a certain amount of trial-and-error and research involved to take care of both standard and non-standard evaluation and named and unnamed arguments. I can’t exclude I have overlooked something, but here are some examples.</p>
+<pre class="r"><code>ff = function(a, b, c) list(a, b, c)
+pff = partial(ff, a = 1)
+pff</code></pre>
+<pre><code># function (b, c) 
+# (function (a, b, c) 
+# list(a, b, c))(a = 1, b, c)</code></pre>
+<pre class="r"><code>pff(c = 3, 2) #named and unnamed</code></pre>
+<pre><code># [[1]]
+# [1] 1
+# 
+# [[2]]
+# [1] 2
+# 
+# [[3]]
+# [1] 3</code></pre>
+<pre class="r"><code>suppressMessages(library(dplyr))
+ff = partial(select, mtcars, mpg) #one lazy and one regular argument
+ff</code></pre>
+<pre><code># function (...) 
+# (function (.data, ...) 
+# {
+#     select_(.data, .dots = lazyeval::lazy_dots(...))
+# })(.data = mtcars, mpg, ...)</code></pre>
+<pre class="r"><code>ff(carb)[1:5, ]</code></pre>
+<pre><code>#                    mpg carb
+# Mazda RX4         21.0    4
+# Mazda RX4 Wag     21.0    4
+# Datsun 710        22.8    1
+# Hornet 4 Drive    21.4    1
+# Hornet Sportabout 18.7    2</code></pre>
+</div>
+<div id="from-partial-to-curry" class="section level2">
+<h2>From <code>partial</code> to <code>curry</code></h2>
+<p>Let’s say we want to curry function <code>ff</code>. The general plan is to build a function of the first argument of <code>ff</code> that uses <code>partial</code> to lock the first argument of ff to the value of its only argument and then, recursively, calls curry on the function thus created. Eventually, we are left with a function of a single argument, which we can return as is. The special case for the <code>...</code> argument and a zero-argument invocation is explained later.</p>
+<pre class="r"><code>bettR::curry</code></pre>
+<pre><code>function(f) {
+    formf = formals(f)
+    lff = length(formf)
+    if(lff == 0 || (lff == 1 &amp;&amp; names(formf) != &quot;...&quot;))
+      f
+    else {
+      make_function(
+        formf[1],
+        quote({
+          args = arglist(lazy = TRUE)
+          if(length(args) &gt; 0)
+            curry(
+              partial(
+                f,
+                .args = args))
+          else
+            f()}))}}
+&lt;environment: namespace:bettR&gt;</code></pre>
+<pre class="r"><code>ff = function(a,b,c ) list(a,b,c)
+cuff = curry(ff)
+cuff(1)</code></pre>
+<pre><code># function (b) 
+# {
+#     args = arglist(lazy = TRUE)
+#     if (length(args) &gt; 0) 
+#         curry(partial(f, .args = args))
+#     else f()
+# }
+# &lt;environment: 0x7f87e0c82f08&gt;</code></pre>
+<pre class="r"><code>cuff(1)(2)</code></pre>
+<pre><code># function (c) 
+# (function (b, c) 
+# (function (a, b, c) 
+# list(a, b, c))(a = 1, b, c))(b = 2, c)
+# &lt;environment: 0x7f87e10ddaa0&gt;</code></pre>
+<pre class="r"><code>cuff(1)(2)(3)</code></pre>
+<pre><code># [[1]]
+# [1] 1
+# 
+# [[2]]
+# [1] 2
+# 
+# [[3]]
+# [1] 3</code></pre>
+<p>And there you have it, hot delicious R curry! With the <code>...</code> argument it’s harder to decide when to stop the recursion. I decided to extend currying to that case by ending the sequence of application with a zero-argument call, that is</p>
+<pre class="r"><code>curry(select)(mtcars)(mpg)(carb)(disp)</code></pre>
+<pre><code># function (...) 
+# {
+#     args = arglist(lazy = TRUE)
+#     if (length(args) &gt; 0) 
+#         curry(partial(f, .args = args))
+#     else f()
+# }
+# &lt;environment: 0x7f87e324dd40&gt;</code></pre>
+<pre class="r"><code>curry(select)(mtcars)(mpg)(carb)(disp)()[1:5, ] </code></pre>
+<pre><code>#                    mpg carb disp
+# Mazda RX4         21.0    4  160
+# Mazda RX4 Wag     21.0    4  160
+# Datsun 710        22.8    1  108
+# Hornet 4 Drive    21.4    1  258
+# Hornet Sportabout 18.7    2  360</code></pre>
+<p>If you wonder what the <code>bettR</code> package is, where this delicious stuff is cooking, it’s my playground of ideas to make R into a better language. It’s on github but I need to warn you that it’s in “research” mode and it’s not ready for either prime or subprime time.</p>
+</div>
+
+
+  </article>
+
+  <div class="SendComment">
+    <a href="mailto:antonio@piccolboni.info?subject=Delicious R Curry&body=http://piccolboni.info/2015/07/delicious-r-curry.html" target="_top">Email the author</a> or <a href="http://via.hypothes.is/http://piccolboni.info//2015/07/delicious-r-curry.html">annotate with hypothes.is</a>
+  </div>
+  <div id="disqus_thread"></div>
+<script>
+
+/**
+ *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+ *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables */
+
+var disqus_config = function () {
+    this.page.url = "http://piccolboni.info//2015/07/delicious-r-curry.html";
+    this.page.identifier = "/2015/07/delicious-r-curry";
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+    var d = document, s = d.createElement('script');
+    s.src = '//piccolbo.disqus.com/embed.js';
+    s.setAttribute('data-timestamp', +new Date());
+    (d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+</div>
+
+      </div>
+    </div>
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <div class="PageNavigation">
+      
+        <a class="prev" href="/2014/08/10-eigenmaps-of-the-united-states-of-america.html">&laquo;    10 eigenmaps of the United States of America</a>
+      
+      
+        <a class="next" href="/2015/09/syntax-directed-diffs-for-R-in-R.html">Syntax Directed Diffs for R in R &raquo;</a>
+      
+    </div>
+
+  </div>
+
+</footer>
+
+    <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-7018175-5', 'piccolboni.info');
+  ga('send', 'pageview');
+
+</script>
+
+  </body>
+
+</html>

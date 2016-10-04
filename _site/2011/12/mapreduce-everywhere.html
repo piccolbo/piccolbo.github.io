@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Mapreduce everywhere</title>
+  <meta name="description" content="Mapreduce could extend its reach beyond — or inside — the data center. Coming soon to a computer near you?The local Hadoop SF meetings cover a variety of top...">
+
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="canonical" href="http://piccolboni.info/2011/12/mapreduce-everywhere.html">
+  <link rel="alternate" type="application/rss+xml" title="Antonio Piccolboni" href="http://piccolboni.info/atom.xml" />
+  <link rel="shortcut icon" type="image/png" href="gravatar32.png?v=3">
+  <script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+  </script>
+  <!-- Begin Jekyll SEO tag v1.4.0 -->
+<title>Mapreduce everywhere - Antonio Piccolboni</title>
+<meta property="og:title" content="Mapreduce everywhere" />
+<meta name="description" content="Mapreduce could extend its reach beyond — or inside — the data center. Coming soon to a computer near you?The local Hadoop SF meetings cover a variety of topics, mostly practical. But on one occasion the discussion took a speculative turn: does Hadoop have legs or is it a stop-gap measure? People supporting the stop-gap thesis presented a hardware argument. SSDs and distributed DRAM-based storage are replacing hard drives in many applications and their performance characteristics are different enough to make Hadoop obsolete. In particular they undermine one of the basic premises of the mapreduce model, that is that sequential access is much faster than random access. While I was trying to mount a defense based on capacity and price, somebody chimed in saying that the latency issue exists at all levels of the memory hierarchy. Wait a minute, flash memory and DRAM don&#39;t spin around and don&#39;t have read/write heads to reposition. You send in an address to read and you get a value out, right? Wrong. I was kindly pointed to this very readable paper, &quot;The Pathologies of big data&quot;, which shows, in Figure 3, how sequential access is faster for spinning disks as well SSDs and DRAM. The gap with random access is staggering for HDs at more than 5 orders of magnitude, slightly less for SSDs and goes down to one order of magnitude for DRAM, but it is still there and getting worse over time. Therefore, one of the assumptions behind mapreduce seems likely to be with us for several years to come. Following this reasoning further, mapreduce may prove useful to program on architectures other than clusters. In fact if you Google [GPU and mapreduce] or [FPGA mapreduce] you&#39;ll find quite a few interesting reads, for instance:GPU:A Map Reduce Framework for Programming Graphics ProcessorsWord Count with MapReduce on a GPU – A Python ExampleMars: A MapReduce Framework on Graphics ProcessorsFPGA:FPMR: MapReduce framework on FPGAGPU and FPGA:Map-reduce as a Programming Model for Custom ComputingAnother example of a new use of map-reduce is Spark. Yes, it still runs on clusters but the role of hard disks is replaced by a &#39;Resilient Distributed Dataset&#39;, an abstraction over distributed DRAM, striking a completely different price/performance trade-off than Hadoop.These are mostly academic forays, but some are more practical, like the Word Count example above. FPGAs may be a bit more exotic, but using GPUs for non graphics related tasks is a major trend in HPC, and Amazon itself offers GPU-capable instances as part of their EC2 service.What are the major assumptions behind the mapreduce model? Let me give it a try:Needless to say, parallel processing.A two-layer memory model: one is fast but low-capacity, used within the map and reduce functions, the other is slow but high capacity.Sequential access is better than random. Sort, don&#39;t index. It doesn&#39;t mean one has to read all the data, all the time, but the trend is toward bigger chunks.Locality: resources local to a processing element are faster than remote ones, all else being equal.It&#39;s a brave new world. Long standing abstractions such as a flat memory model are reversed. Writing programs under these new assumptions is a cultural shift.Where else could the mapreduce model prove useful? Look no further than your very own laptop or server. Let&#39;s check the four assumptions:The number of cores is ever increasing, with AMD packing 16&nbsp;in their server CPUs and HP 1152 in their ARM/Calxeda based Redstone platform, a 4U server&nbsp;(goodness starts at 0:55). In the HPC market, Intel is squeezing more than 50 cores on their x86 compatible Knight&#39;s Corner and embedded processors manufacturers are outdoing each other, with GreenArray at 144 cores and Adapteva promising a staggering 4096. With nowhere to go as far as clock speed, running out of ideas to make each cycle accomplish more and with power limits the main concern for designers of mobile devices and data centers alike, chip makers are likely to make core count follow the next variant of Moore&#39;s law. The free lunch is over. We need to master parallel programming, now, and mapreduce is the gentle way.Memory layers below the DRAM abound, they are called registers, L1, L2 and L3 cache, from the fastest to the slowest. Size is inversely proportional to speed. Currently, most programmers are blissfully unaware of these subtleties and let optimizing compilers do the best they can. If programs were rewritten to follow the mapreduce model, they would be naturally suited to maximize locality of reference (p. 12:3, bottom), improving cache hits and prefetch effectiveness. Maybe a compiler could be tailored for mapreduce programs and squeeze out even more speed.Sequential access is faster, even for DRAM. That&#39;s the realization that inspired this post in the first place.L1 and L2 are core-local, whereas L3 and DRAM are shared in recent Intel designs. This may change one day as the effort to provide the convenience of a unified memory space takes an ever increasing toll on performance and power consumption.I thought I&#39;d back this with a little experiment. I copied a big vector into another one, the first time in order from the first element to the last, the second in a random order (specifically a random permutation of the index range). Each vector takes more than 70 MB of memory vs. an L3 cache size of 6MB in a 2011 sandy bridge i7 quad processor. This is from an R session:big = 10000000A = rnorm(big)#fill with some random numbersB = Asequential = 1:bigrandom = sample(sequential, big, replace=FALSE)system.time({B = A[sequential]}) user  system elapsed 0.097   0.023   0.120 system.time({B = A[random]}) user  system elapsed 0.246   0.027   0.273 system.time({B = A[sequential]}) user  system elapsed 0.074   0.000   0.074 system.time({B = A[random]}) user  system elapsed 0.232   0.000   0.233[...] We can observe a roughly 3-fold difference if we copy elements in order as opposed according to a random permutation of positions. See this other example for a similar effect observed by modifying a matrix multiplication algorithm to enhance locality, this time in C.In summary, the mapreduce model seems to be a good fit for a variety of promising architectures. The basic assumptions on which it is based are ubiquitous. &nbsp;Maybe it is a unifying programming model that will help us in the transition to parallel computing.CommentsUnknownhttp://research.microsoft.com/pubs/163083/hotcbp12%20final.pdf" />
+<meta property="og:description" content="Mapreduce could extend its reach beyond — or inside — the data center. Coming soon to a computer near you?The local Hadoop SF meetings cover a variety of topics, mostly practical. But on one occasion the discussion took a speculative turn: does Hadoop have legs or is it a stop-gap measure? People supporting the stop-gap thesis presented a hardware argument. SSDs and distributed DRAM-based storage are replacing hard drives in many applications and their performance characteristics are different enough to make Hadoop obsolete. In particular they undermine one of the basic premises of the mapreduce model, that is that sequential access is much faster than random access. While I was trying to mount a defense based on capacity and price, somebody chimed in saying that the latency issue exists at all levels of the memory hierarchy. Wait a minute, flash memory and DRAM don&#39;t spin around and don&#39;t have read/write heads to reposition. You send in an address to read and you get a value out, right? Wrong. I was kindly pointed to this very readable paper, &quot;The Pathologies of big data&quot;, which shows, in Figure 3, how sequential access is faster for spinning disks as well SSDs and DRAM. The gap with random access is staggering for HDs at more than 5 orders of magnitude, slightly less for SSDs and goes down to one order of magnitude for DRAM, but it is still there and getting worse over time. Therefore, one of the assumptions behind mapreduce seems likely to be with us for several years to come. Following this reasoning further, mapreduce may prove useful to program on architectures other than clusters. In fact if you Google [GPU and mapreduce] or [FPGA mapreduce] you&#39;ll find quite a few interesting reads, for instance:GPU:A Map Reduce Framework for Programming Graphics ProcessorsWord Count with MapReduce on a GPU – A Python ExampleMars: A MapReduce Framework on Graphics ProcessorsFPGA:FPMR: MapReduce framework on FPGAGPU and FPGA:Map-reduce as a Programming Model for Custom ComputingAnother example of a new use of map-reduce is Spark. Yes, it still runs on clusters but the role of hard disks is replaced by a &#39;Resilient Distributed Dataset&#39;, an abstraction over distributed DRAM, striking a completely different price/performance trade-off than Hadoop.These are mostly academic forays, but some are more practical, like the Word Count example above. FPGAs may be a bit more exotic, but using GPUs for non graphics related tasks is a major trend in HPC, and Amazon itself offers GPU-capable instances as part of their EC2 service.What are the major assumptions behind the mapreduce model? Let me give it a try:Needless to say, parallel processing.A two-layer memory model: one is fast but low-capacity, used within the map and reduce functions, the other is slow but high capacity.Sequential access is better than random. Sort, don&#39;t index. It doesn&#39;t mean one has to read all the data, all the time, but the trend is toward bigger chunks.Locality: resources local to a processing element are faster than remote ones, all else being equal.It&#39;s a brave new world. Long standing abstractions such as a flat memory model are reversed. Writing programs under these new assumptions is a cultural shift.Where else could the mapreduce model prove useful? Look no further than your very own laptop or server. Let&#39;s check the four assumptions:The number of cores is ever increasing, with AMD packing 16&nbsp;in their server CPUs and HP 1152 in their ARM/Calxeda based Redstone platform, a 4U server&nbsp;(goodness starts at 0:55). In the HPC market, Intel is squeezing more than 50 cores on their x86 compatible Knight&#39;s Corner and embedded processors manufacturers are outdoing each other, with GreenArray at 144 cores and Adapteva promising a staggering 4096. With nowhere to go as far as clock speed, running out of ideas to make each cycle accomplish more and with power limits the main concern for designers of mobile devices and data centers alike, chip makers are likely to make core count follow the next variant of Moore&#39;s law. The free lunch is over. We need to master parallel programming, now, and mapreduce is the gentle way.Memory layers below the DRAM abound, they are called registers, L1, L2 and L3 cache, from the fastest to the slowest. Size is inversely proportional to speed. Currently, most programmers are blissfully unaware of these subtleties and let optimizing compilers do the best they can. If programs were rewritten to follow the mapreduce model, they would be naturally suited to maximize locality of reference (p. 12:3, bottom), improving cache hits and prefetch effectiveness. Maybe a compiler could be tailored for mapreduce programs and squeeze out even more speed.Sequential access is faster, even for DRAM. That&#39;s the realization that inspired this post in the first place.L1 and L2 are core-local, whereas L3 and DRAM are shared in recent Intel designs. This may change one day as the effort to provide the convenience of a unified memory space takes an ever increasing toll on performance and power consumption.I thought I&#39;d back this with a little experiment. I copied a big vector into another one, the first time in order from the first element to the last, the second in a random order (specifically a random permutation of the index range). Each vector takes more than 70 MB of memory vs. an L3 cache size of 6MB in a 2011 sandy bridge i7 quad processor. This is from an R session:big = 10000000A = rnorm(big)#fill with some random numbersB = Asequential = 1:bigrandom = sample(sequential, big, replace=FALSE)system.time({B = A[sequential]}) user  system elapsed 0.097   0.023   0.120 system.time({B = A[random]}) user  system elapsed 0.246   0.027   0.273 system.time({B = A[sequential]}) user  system elapsed 0.074   0.000   0.074 system.time({B = A[random]}) user  system elapsed 0.232   0.000   0.233[...] We can observe a roughly 3-fold difference if we copy elements in order as opposed according to a random permutation of positions. See this other example for a similar effect observed by modifying a matrix multiplication algorithm to enhance locality, this time in C.In summary, the mapreduce model seems to be a good fit for a variety of promising architectures. The basic assumptions on which it is based are ubiquitous. &nbsp;Maybe it is a unifying programming model that will help us in the transition to parallel computing.CommentsUnknownhttp://research.microsoft.com/pubs/163083/hotcbp12%20final.pdf" />
+<link rel="canonical" href="http://piccolboni.info/2011/12/mapreduce-everywhere.html" />
+<meta property="og:url" content="http://piccolboni.info/2011/12/mapreduce-everywhere.html" />
+<meta property="og:site_name" content="Antonio Piccolboni" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2011-12-03T00:00:00-08:00" />
+<link rel="next" href="http://piccolboni.info/2012/05/essential-r-packages.html" title="The essential R packages" />
+<link rel="prev" href="http://piccolboni.info/2011/09/connected-components-example-rewritten.html" title="The connected components example, rewritten using RHadoop/rmr" />
+<script type="application/ld+json">
+  {
+    "@context": "http://schema.org",
+    "@type": "BlogPosting",
+    "headline": "Mapreduce everywhere",
+    "datePublished": "2011-12-03T00:00:00-08:00",
+    "description": "Mapreduce could extend its reach beyond — or inside — the data center. Coming soon to a computer near you?The local Hadoop SF meetings cover a variety of topics, mostly practical. But on one occasion the discussion took a speculative turn: does Hadoop have legs or is it a stop-gap measure? People supporting the stop-gap thesis presented a hardware argument. SSDs and distributed DRAM-based storage are replacing hard drives in many applications and their performance characteristics are different enough to make Hadoop obsolete. In particular they undermine one of the basic premises of the mapreduce model, that is that sequential access is much faster than random access. While I was trying to mount a defense based on capacity and price, somebody chimed in saying that the latency issue exists at all levels of the memory hierarchy. Wait a minute, flash memory and DRAM don&#39;t spin around and don&#39;t have read/write heads to reposition. You send in an address to read and you get a value out, right? Wrong. I was kindly pointed to this very readable paper, &quot;The Pathologies of big data&quot;, which shows, in Figure 3, how sequential access is faster for spinning disks as well SSDs and DRAM. The gap with random access is staggering for HDs at more than 5 orders of magnitude, slightly less for SSDs and goes down to one order of magnitude for DRAM, but it is still there and getting worse over time. Therefore, one of the assumptions behind mapreduce seems likely to be with us for several years to come. Following this reasoning further, mapreduce may prove useful to program on architectures other than clusters. In fact if you Google [GPU and mapreduce] or [FPGA mapreduce] you&#39;ll find quite a few interesting reads, for instance:GPU:A Map Reduce Framework for Programming Graphics ProcessorsWord Count with MapReduce on a GPU – A Python ExampleMars: A MapReduce Framework on Graphics ProcessorsFPGA:FPMR: MapReduce framework on FPGAGPU and FPGA:Map-reduce as a Programming Model for Custom ComputingAnother example of a new use of map-reduce is Spark. Yes, it still runs on clusters but the role of hard disks is replaced by a &#39;Resilient Distributed Dataset&#39;, an abstraction over distributed DRAM, striking a completely different price/performance trade-off than Hadoop.These are mostly academic forays, but some are more practical, like the Word Count example above. FPGAs may be a bit more exotic, but using GPUs for non graphics related tasks is a major trend in HPC, and Amazon itself offers GPU-capable instances as part of their EC2 service.What are the major assumptions behind the mapreduce model? Let me give it a try:Needless to say, parallel processing.A two-layer memory model: one is fast but low-capacity, used within the map and reduce functions, the other is slow but high capacity.Sequential access is better than random. Sort, don&#39;t index. It doesn&#39;t mean one has to read all the data, all the time, but the trend is toward bigger chunks.Locality: resources local to a processing element are faster than remote ones, all else being equal.It&#39;s a brave new world. Long standing abstractions such as a flat memory model are reversed. Writing programs under these new assumptions is a cultural shift.Where else could the mapreduce model prove useful? Look no further than your very own laptop or server. Let&#39;s check the four assumptions:The number of cores is ever increasing, with AMD packing 16&nbsp;in their server CPUs and HP 1152 in their ARM/Calxeda based Redstone platform, a 4U server&nbsp;(goodness starts at 0:55). In the HPC market, Intel is squeezing more than 50 cores on their x86 compatible Knight&#39;s Corner and embedded processors manufacturers are outdoing each other, with GreenArray at 144 cores and Adapteva promising a staggering 4096. With nowhere to go as far as clock speed, running out of ideas to make each cycle accomplish more and with power limits the main concern for designers of mobile devices and data centers alike, chip makers are likely to make core count follow the next variant of Moore&#39;s law. The free lunch is over. We need to master parallel programming, now, and mapreduce is the gentle way.Memory layers below the DRAM abound, they are called registers, L1, L2 and L3 cache, from the fastest to the slowest. Size is inversely proportional to speed. Currently, most programmers are blissfully unaware of these subtleties and let optimizing compilers do the best they can. If programs were rewritten to follow the mapreduce model, they would be naturally suited to maximize locality of reference (p. 12:3, bottom), improving cache hits and prefetch effectiveness. Maybe a compiler could be tailored for mapreduce programs and squeeze out even more speed.Sequential access is faster, even for DRAM. That&#39;s the realization that inspired this post in the first place.L1 and L2 are core-local, whereas L3 and DRAM are shared in recent Intel designs. This may change one day as the effort to provide the convenience of a unified memory space takes an ever increasing toll on performance and power consumption.I thought I&#39;d back this with a little experiment. I copied a big vector into another one, the first time in order from the first element to the last, the second in a random order (specifically a random permutation of the index range). Each vector takes more than 70 MB of memory vs. an L3 cache size of 6MB in a 2011 sandy bridge i7 quad processor. This is from an R session:big = 10000000A = rnorm(big)#fill with some random numbersB = Asequential = 1:bigrandom = sample(sequential, big, replace=FALSE)system.time({B = A[sequential]}) user  system elapsed 0.097   0.023   0.120 system.time({B = A[random]}) user  system elapsed 0.246   0.027   0.273 system.time({B = A[sequential]}) user  system elapsed 0.074   0.000   0.074 system.time({B = A[random]}) user  system elapsed 0.232   0.000   0.233[...] We can observe a roughly 3-fold difference if we copy elements in order as opposed according to a random permutation of positions. See this other example for a similar effect observed by modifying a matrix multiplication algorithm to enhance locality, this time in C.In summary, the mapreduce model seems to be a good fit for a variety of promising architectures. The basic assumptions on which it is based are ubiquitous. &nbsp;Maybe it is a unifying programming model that will help us in the transition to parallel computing.CommentsUnknownhttp://research.microsoft.com/pubs/163083/hotcbp12%20final.pdf",
+    "url": "http://piccolboni.info/2011/12/mapreduce-everywhere.html"
+  }
+</script>
+<!-- End Jekyll SEO tag -->
+</head>
+
+
+  <body>
+
+    <header class="site-header">
+
+  <div class="wrapper">
+
+    <a class="site-title" href="/">Antonio Piccolboni</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg viewBox="0 0 18 15">
+          <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+
+      <div class="trigger">
+        
+          
+          <a class="page-link" href="/about">About me</a>
+          
+        
+          
+        
+          
+        
+          
+        
+          
+          <a class="page-link" href="/contact">Contact</a>
+          
+        
+          
+        
+          
+        
+          
+          <a class="page-link" href="/projects">Projects</a>
+          
+        
+          
+        
+          
+          <a class="page-link" href="/speaking">Speaking</a>
+          
+        
+          
+          <a class="page-link" href="/writing">Writing</a>
+          
+        
+        <a class="page-link" href="https://feedburner.google.com/fb/a/mailverify?uri=piccolboni/qdqo&amp;loc=en_US">Subscribe</a>
+      </div>
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <div class="page-content">
+      <div class="wrapper">
+        <div class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">Mapreduce everywhere</h1>
+    <p class="post-meta">Dec 3, 2011</p>
+  </header>
+
+  <article class="post-content">
+    <div class='post'>
+<div>Mapreduce could extend its reach beyond — or inside — the data center. Coming soon to a computer near you?<br /><!--more--><a name='more'></a><br />The local <a href="http://www.meetup.com/hadoopsf/">Hadoop SF meetings</a> cover a variety of topics, mostly practical. But on one occasion the discussion took a speculative turn: does Hadoop have legs or is it a stop-gap measure? People supporting the stop-gap thesis presented a hardware argument. SSDs and distributed DRAM-based storage are replacing hard drives in many applications and their performance characteristics are different enough to make Hadoop obsolete. In particular they undermine one of the basic premises of the mapreduce model, that is that sequential access is much faster than random access. While I was trying to mount a defense based on capacity and price, somebody chimed in saying that the latency issue exists at all levels of the memory hierarchy. Wait a minute, flash memory and DRAM don't spin around and don't have read/write heads to reposition. You send in an address to read and you get a value out, right? Wrong. I was kindly pointed to this very readable paper, "<a href="http://queue.acm.org/detail.cfm?id=1563874">The Pathologies of big data</a>", which shows, in Figure 3, how sequential access is faster for spinning disks as well SSDs and DRAM. The gap with random access is staggering for HDs at more than 5 orders of magnitude, slightly less for SSDs and goes down to one order of magnitude for DRAM, but it is still there and <a href="http://www.chipestimate.com/techtalk.php?d=2011-11-22">getting worse</a> over time. Therefore, one of the assumptions behind mapreduce seems likely to be with us for several years to come. Following this reasoning further, mapreduce may prove useful to program on architectures other than clusters. In fact if you Google [GPU and mapreduce] or [FPGA mapreduce] you'll find quite a few interesting reads, for instance:</div><ul><li>GPU:</li><ul><li><a href="http://people.csail.mit.edu/rabbah/conferences/08/cgo/stmcs/talks/catanzaro-stmcs08-talk.pdf">A Map Reduce Framework for Programming Graphics Processors</a></li><li><a href="http://atbrox.com/2010/08/20/word-count-with-mapreduce-on-a-gpu-a-python-example/">Word Count with MapReduce on a GPU – A Python Example</a></li><li><a href="http://www.cse.ust.hk/gpuqp/Mars_tr.pdf">Mars: A MapReduce Framework on Graphics Processors</a></li></ul><li>FPGA:</li><ul><li><a href="http://dl.acm.org/citation.cfm?id=1723129&amp;dl=ACM&amp;coll=DL&amp;CFID=56352912&amp;CFTOKEN=85647746">FPMR: MapReduce framework on FPGA</a></li></ul><li>GPU and FPGA:</li><ul><li><a href="http://www.cse.cuhk.edu.hk/~phwl/mt/public/archives/papers/mr_fccm08.pdf">Map-reduce as a Programming Model for Custom Computing</a></li></ul></ul><div>Another example of a new use of map-reduce is <a href="https://www.cs.berkeley.edu/~matei/spark/">Spark</a>. Yes, it still runs on clusters but the role of hard disks is replaced by a 'Resilient Distributed Dataset', an abstraction over distributed DRAM, striking a completely different price/performance trade-off than Hadoop.</div><div>These are mostly academic forays, but some are more practical, like the Word Count example above. FPGAs may be a bit more exotic, but using GPUs for non graphics related tasks is a major trend in HPC, and Amazon itself offers GPU-capable instances as part of their EC2 service.<br /><div><br /></div><div>What are the major assumptions behind the mapreduce model? Let me give it a try:</div><div><ol><li>Needless to say, parallel processing.</li><li>A two-layer memory model: one is fast but low-capacity, used within the map and reduce functions, the other is slow but high capacity.</li><li>Sequential access is better than random. Sort, don't index. It doesn't mean one has to read all the data, all the time, but the trend is toward bigger chunks.</li><li>Locality: resources local to a processing element are faster than remote ones, all else being equal.</li></ol><div>It's a brave new world. Long standing abstractions such as a flat memory model are reversed. Writing programs under these new assumptions is a cultural shift.<br /><br />Where else could the mapreduce model prove useful? Look no further than your very own laptop or server. Let's check the four assumptions:</div><div><ol><li>The number of cores is ever increasing, with <a href="http://arstechnica.com/business/news/2011/11/amds-16-core-bulldozer-pushes-into-the-server-room.ars">AMD packing 16</a>&nbsp;in their server CPUs and HP 1152 in their ARM/Calxeda based <a href="http://h17007.www1.hp.com/us/en/iss/110111.aspx">Redstone platform</a>, a 4U server&nbsp;(goodness starts at 0:55). In the HPC market, Intel is squeezing more than 50 cores on their x86 compatible <a href="http://www.tomshardware.com/news/intel-knights-corner-mic-co-processor,14002.html">Knight's Corner</a> and embedded processors manufacturers are outdoing each other, with <a href="http://www.greenarraychips.com/">GreenArray</a> at 144 cores and <a href="http://www.adapteva.com/index.php?option=com_content&amp;view=article&amp;id=72&amp;Itemid=79">Adapteva</a> promising a staggering 4096. With nowhere to go as far as clock speed, running out of ideas to make each cycle accomplish more and with power limits the main concern for designers of mobile devices and data centers alike, chip makers are likely to make core count follow the next variant of Moore's law. <a href="http://www.gotw.ca/publications/concurrency-ddj.htm">The free lunch is over</a>. We need to master parallel programming, now, and mapreduce is the gentle way.</li><li>Memory layers below the DRAM abound, they are called registers, L1, L2 and L3 cache, from the fastest to the slowest. Size is inversely proportional to speed. Currently, most programmers are blissfully unaware of these subtleties and let optimizing compilers do the best they can. If programs were rewritten to follow the mapreduce model, they would be naturally suited to <a href="http://csl.stanford.edu/~christos/publications/2008.pmarch.taco.pdf">maximize locality of reference</a> (p. 12:3, bottom), improving cache hits and prefetch effectiveness. Maybe a compiler could be tailored for mapreduce programs and squeeze out even more speed.</li><li>Sequential access is faster, even for DRAM. That's the realization that inspired this post in the first place.</li><li>L1 and L2 are core-local, whereas L3 and DRAM are shared in recent Intel designs. This <a href="http://jacob.leverich.org/papers/2008.mcdimm.cal.pdf">may change</a> one day as the effort to provide the convenience of a unified memory space takes an ever increasing toll on performance and power consumption.</li></ol><div>I thought I'd back this with a little experiment. I copied a big vector into another one, the first time in order from the first element to the last, the second in a random order (specifically a random permutation of the index range). Each vector takes more than 70 MB of memory vs. an L3 cache size of 6MB in a 2011 sandy bridge i7 quad processor. This is from an <a href="http://www.r-project.org/">R</a> session:<br /><br /></div><div><pre class="brush:r">big = 10000000<br />A = rnorm(big)#fill with some random numbers<br />B = A<br />sequential = 1:big<br />random = sample(sequential, big, replace=FALSE)<br />system.time({B = A[sequential]})<br /> user  system elapsed <br />0.097   0.023   0.120 <br />system.time({B = A[random]})<br /> user  system elapsed <br />0.246   0.027   0.273 <br />system.time({B = A[sequential]})<br /> user  system elapsed <br />0.074   0.000   0.074 <br />system.time({B = A[random]})<br /> user  system elapsed <br />0.232   0.000   0.233<br />[...] <br /></pre><br />We can observe a roughly 3-fold difference if we copy elements in order as opposed according to a random permutation of positions. See this <a href="http://draft.blogger.com/"><span id="goog_774501965"></span>other example<span id="goog_774501966"></span></a> for a similar effect observed by modifying a matrix multiplication algorithm to enhance locality, this time in C.<br /><br /></div><div>In summary, the mapreduce model seems to be a good fit for a variety of promising architectures. The basic assumptions on which it is based are ubiquitous. &nbsp;Maybe it is a unifying programming model that will help us in the transition to parallel computing.<br /><br /></div></div></div></div></div>
+<h2>Comments</h2>
+<div class='comments'>
+<div class='comment'>
+<div class='author'>Unknown</div>
+<div class='content'>
+http://research.microsoft.com/pubs/163083/hotcbp12%20final.pdf</div>
+</div>
+</div>
+
+  </article>
+
+  <div class="SendComment">
+    <a href="mailto:antonio@piccolboni.info?subject=Mapreduce everywhere&body=http://piccolboni.info/2011/12/mapreduce-everywhere.html" target="_top">Email the author</a> or <a href="http://via.hypothes.is/http://piccolboni.info//2011/12/mapreduce-everywhere.html">annotate with hypothes.is</a>
+  </div>
+  <div id="disqus_thread"></div>
+<script>
+
+/**
+ *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+ *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables */
+
+var disqus_config = function () {
+    this.page.url = "http://piccolboni.info//2011/12/mapreduce-everywhere.html";
+    this.page.identifier = "/2011/12/mapreduce-everywhere";
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+    var d = document, s = d.createElement('script');
+    s.src = '//piccolbo.disqus.com/embed.js';
+    s.setAttribute('data-timestamp', +new Date());
+    (d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+</div>
+
+      </div>
+    </div>
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <div class="PageNavigation">
+      
+        <a class="prev" href="/2011/09/connected-components-example-rewritten.html">&laquo;    The connected components example, rewritten using RHadoop/rmr</a>
+      
+      
+        <a class="next" href="/2012/05/essential-r-packages.html">The essential R packages &raquo;</a>
+      
+    </div>
+
+  </div>
+
+</footer>
+
+    <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-7018175-5', 'piccolboni.info');
+  ga('send', 'pageview');
+
+</script>
+
+  </body>
+
+</html>

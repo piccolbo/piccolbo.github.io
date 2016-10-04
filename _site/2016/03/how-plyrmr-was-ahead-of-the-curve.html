@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>How plyrmr was ahead of the curve</title>
+  <meta name="description" content="I recently attended  a talk by the always excellent Hadley Wickham about his latest work on creating and visualizing many models.I combine here two snippets ...">
+
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="canonical" href="http://piccolboni.info/2016/03/how-plyrmr-was-ahead-of-the-curve.html">
+  <link rel="alternate" type="application/rss+xml" title="Antonio Piccolboni" href="http://piccolboni.info/atom.xml" />
+  <link rel="shortcut icon" type="image/png" href="gravatar32.png?v=3">
+  <script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+  </script>
+  <!-- Begin Jekyll SEO tag v1.4.0 -->
+<title>How plyrmr was ahead of the curve - Antonio Piccolboni</title>
+<meta property="og:title" content="How plyrmr was ahead of the curve" />
+<meta name="description" content="I recently attended  a talk by the always excellent Hadley Wickham about his latest work on creating and visualizing many models.I combine here two snippets from that tutorial for your convenience and further discussion:    gapminder %&gt;%      group_by(continent, country) %&gt;%      nest() %&gt;%      mutate(model = purrr::map(data, ~ lm(lifeExp ~ year, data = .)))This code groups the data by the selected columns and then fits a linear model for each group using the specified variables. Very elegant indeed. You may notice I did not mention what nest does. It changes the layout of the data, but it has a single argument and it can be inverted with unnest. To speak somewhat figuratively, it doesn’t add or remove anything; it is like a format change. As I saw this example, it jogged my memory: my old work plyrmr allowed to do pretty much the same, without any nest call. Let’s grab a similar snippet from the plyrmr tutorial:    input(&quot;/tmp/mtcars&quot;) %|%      group(carb) %|%      transmute(model = list(lm(mpg ~ cyl + disp)))Forget that this works on distributed data sets and other differences. At an abstract level, it takes a structured data set, groups it by some variables and then fits a model for each group. But it doesn’t require nesting or unnesting and it doesn’t require the purrr::map call inside the mutate of the first snippet. The idea is: when a data set is grouped, each group should work like a separate little data set, which is a little what nest helps with. In dplyr, grouped datasets are kind of grouped, but also still kind of flat; they don’t go all the way. If you run a mutate on them, the grouping is not very important; if you run a summarize, it is. In plyrmr, grouping seems equivalent to grouping and nesting at the same time. The expressions provided to transmute as ... arguments are evaluated in a context where one group of data at a time is attached or otherwise available for evaluation. Hence the result is a dataset with a list of models as a column.This is not to say that you should ditch dplyr and use plyrmr: there are several other differences and for the latter, unfortunately, development appears to have ceased. But as far as API design, I am very proud of what we were trying to do." />
+<meta property="og:description" content="I recently attended  a talk by the always excellent Hadley Wickham about his latest work on creating and visualizing many models.I combine here two snippets from that tutorial for your convenience and further discussion:    gapminder %&gt;%      group_by(continent, country) %&gt;%      nest() %&gt;%      mutate(model = purrr::map(data, ~ lm(lifeExp ~ year, data = .)))This code groups the data by the selected columns and then fits a linear model for each group using the specified variables. Very elegant indeed. You may notice I did not mention what nest does. It changes the layout of the data, but it has a single argument and it can be inverted with unnest. To speak somewhat figuratively, it doesn’t add or remove anything; it is like a format change. As I saw this example, it jogged my memory: my old work plyrmr allowed to do pretty much the same, without any nest call. Let’s grab a similar snippet from the plyrmr tutorial:    input(&quot;/tmp/mtcars&quot;) %|%      group(carb) %|%      transmute(model = list(lm(mpg ~ cyl + disp)))Forget that this works on distributed data sets and other differences. At an abstract level, it takes a structured data set, groups it by some variables and then fits a model for each group. But it doesn’t require nesting or unnesting and it doesn’t require the purrr::map call inside the mutate of the first snippet. The idea is: when a data set is grouped, each group should work like a separate little data set, which is a little what nest helps with. In dplyr, grouped datasets are kind of grouped, but also still kind of flat; they don’t go all the way. If you run a mutate on them, the grouping is not very important; if you run a summarize, it is. In plyrmr, grouping seems equivalent to grouping and nesting at the same time. The expressions provided to transmute as ... arguments are evaluated in a context where one group of data at a time is attached or otherwise available for evaluation. Hence the result is a dataset with a list of models as a column.This is not to say that you should ditch dplyr and use plyrmr: there are several other differences and for the latter, unfortunately, development appears to have ceased. But as far as API design, I am very proud of what we were trying to do." />
+<link rel="canonical" href="http://piccolboni.info/2016/03/how-plyrmr-was-ahead-of-the-curve.html" />
+<meta property="og:url" content="http://piccolboni.info/2016/03/how-plyrmr-was-ahead-of-the-curve.html" />
+<meta property="og:site_name" content="Antonio Piccolboni" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2016-03-31T07:10:32-07:00" />
+<link rel="prev" href="http://piccolboni.info/2015/09/pipe-operator-for-R.html" title="Yet Another Pipe Operator in R to unify interactive and programming use" />
+<script type="application/ld+json">
+  {
+    "@context": "http://schema.org",
+    "@type": "BlogPosting",
+    "headline": "How plyrmr was ahead of the curve",
+    "datePublished": "2016-03-31T07:10:32-07:00",
+    "description": "I recently attended  a talk by the always excellent Hadley Wickham about his latest work on creating and visualizing many models.I combine here two snippets from that tutorial for your convenience and further discussion:    gapminder %&gt;%      group_by(continent, country) %&gt;%      nest() %&gt;%      mutate(model = purrr::map(data, ~ lm(lifeExp ~ year, data = .)))This code groups the data by the selected columns and then fits a linear model for each group using the specified variables. Very elegant indeed. You may notice I did not mention what nest does. It changes the layout of the data, but it has a single argument and it can be inverted with unnest. To speak somewhat figuratively, it doesn’t add or remove anything; it is like a format change. As I saw this example, it jogged my memory: my old work plyrmr allowed to do pretty much the same, without any nest call. Let’s grab a similar snippet from the plyrmr tutorial:    input(&quot;/tmp/mtcars&quot;) %|%      group(carb) %|%      transmute(model = list(lm(mpg ~ cyl + disp)))Forget that this works on distributed data sets and other differences. At an abstract level, it takes a structured data set, groups it by some variables and then fits a model for each group. But it doesn’t require nesting or unnesting and it doesn’t require the purrr::map call inside the mutate of the first snippet. The idea is: when a data set is grouped, each group should work like a separate little data set, which is a little what nest helps with. In dplyr, grouped datasets are kind of grouped, but also still kind of flat; they don’t go all the way. If you run a mutate on them, the grouping is not very important; if you run a summarize, it is. In plyrmr, grouping seems equivalent to grouping and nesting at the same time. The expressions provided to transmute as ... arguments are evaluated in a context where one group of data at a time is attached or otherwise available for evaluation. Hence the result is a dataset with a list of models as a column.This is not to say that you should ditch dplyr and use plyrmr: there are several other differences and for the latter, unfortunately, development appears to have ceased. But as far as API design, I am very proud of what we were trying to do.",
+    "url": "http://piccolboni.info/2016/03/how-plyrmr-was-ahead-of-the-curve.html"
+  }
+</script>
+<!-- End Jekyll SEO tag -->
+</head>
+
+
+  <body>
+
+    <header class="site-header">
+
+  <div class="wrapper">
+
+    <a class="site-title" href="/">Antonio Piccolboni</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg viewBox="0 0 18 15">
+          <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+
+      <div class="trigger">
+        
+          
+          <a class="page-link" href="/about">About me</a>
+          
+        
+          
+        
+          
+        
+          
+        
+          
+          <a class="page-link" href="/contact">Contact</a>
+          
+        
+          
+        
+          
+        
+          
+          <a class="page-link" href="/projects">Projects</a>
+          
+        
+          
+        
+          
+          <a class="page-link" href="/speaking">Speaking</a>
+          
+        
+          
+          <a class="page-link" href="/writing">Writing</a>
+          
+        
+        <a class="page-link" href="https://feedburner.google.com/fb/a/mailverify?uri=piccolboni/qdqo&amp;loc=en_US">Subscribe</a>
+      </div>
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <div class="page-content">
+      <div class="wrapper">
+        <div class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">How plyrmr was ahead of the curve</h1>
+    <p class="post-meta">Mar 31, 2016</p>
+  </header>
+
+  <article class="post-content">
+    <p>I recently attended  a talk by the always excellent Hadley Wickham about his latest work on <a href="http://blog.rstudio.org/2016/02/02/tidyr-0-4-0/">creating and visualizing many models</a>.</p>
+
+<p>I combine here two snippets from that tutorial for your convenience and further discussion:</p>
+
+<figure class="highlight"><pre><code class="language-r" data-lang="r">    <span class="n">gapminder</span> <span class="o">%&gt;%</span>
+      <span class="n">group_by</span><span class="p">(</span><span class="n">continent</span><span class="p">,</span> <span class="n">country</span><span class="p">)</span> <span class="o">%&gt;%</span>
+      <span class="n">nest</span><span class="p">()</span> <span class="o">%&gt;%</span>
+      <span class="n">mutate</span><span class="p">(</span><span class="n">model</span> <span class="o">=</span> <span class="n">purrr</span><span class="o">::</span><span class="n">map</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="o">~</span> <span class="n">lm</span><span class="p">(</span><span class="n">lifeExp</span> <span class="o">~</span> <span class="n">year</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="err">.</span><span class="p">)))</span></code></pre></figure>
+
+<p>This code groups the data by the selected columns and then fits a linear model for each group using the specified variables. Very elegant indeed. You may notice I did not mention what <code class="highlighter-rouge">nest</code> does. It changes the layout of the data, but it has a single argument and it can be inverted with <code class="highlighter-rouge">unnest</code>. To speak somewhat figuratively, <em>it doesn’t add or remove anything</em>; it is like a format change. As I saw this example, it jogged my memory: my old work <a href="https://github.com/RevolutionAnalytics/plyrmr/blob/master/docs/tutorial.md"><code class="highlighter-rouge">plyrmr</code></a> allowed to do pretty much the same, without any <code class="highlighter-rouge">nest</code> call. Let’s grab a similar snippet from the <code class="highlighter-rouge">plyrmr</code> tutorial:</p>
+
+<figure class="highlight"><pre><code class="language-r" data-lang="r">    <span class="n">input</span><span class="p">(</span><span class="s2">"/tmp/mtcars"</span><span class="p">)</span> <span class="o">%|%</span>
+      <span class="n">group</span><span class="p">(</span><span class="n">carb</span><span class="p">)</span> <span class="o">%|%</span>
+      <span class="n">transmute</span><span class="p">(</span><span class="n">model</span> <span class="o">=</span> <span class="n">list</span><span class="p">(</span><span class="n">lm</span><span class="p">(</span><span class="n">mpg</span> <span class="o">~</span> <span class="n">cyl</span> <span class="o">+</span> <span class="n">disp</span><span class="p">)))</span></code></pre></figure>
+
+<p>Forget that this works on distributed data sets and other differences. At an abstract level, it takes a structured data set, groups it by some variables and then fits a model for each group. But it doesn’t require nesting or unnesting and it doesn’t require the <code class="highlighter-rouge">purrr::map</code> call inside the <code class="highlighter-rouge">mutate</code> of the first snippet. The idea is: when a data set is grouped, each group should work like a separate little data set, which is a little what <code class="highlighter-rouge">nest</code> helps with. In <code class="highlighter-rouge">dplyr</code>, grouped datasets are kind of grouped, but also still kind of flat; they don’t go all the way. If you run a <code class="highlighter-rouge">mutate</code> on them, the grouping is not very important; if you run a <code class="highlighter-rouge">summarize</code>, it is. In <code class="highlighter-rouge">plyrmr</code>, grouping seems equivalent to grouping and nesting at the same time. The expressions provided to transmute as <code class="highlighter-rouge">...</code> arguments are evaluated in a context where one group of data at a time is attached or otherwise available for evaluation. Hence the result is a dataset with a list of models as a column.</p>
+
+<p>This is not to say that you should ditch <code class="highlighter-rouge">dplyr</code> and use <code class="highlighter-rouge">plyrmr</code>: there are several other differences and for the latter, unfortunately, development appears to have ceased. But as far as API design, I am very proud of what we were trying to do.</p>
+
+  </article>
+
+  <div class="SendComment">
+    <a href="mailto:antonio@piccolboni.info?subject=How plyrmr was ahead of the curve&body=http://piccolboni.info/2016/03/how-plyrmr-was-ahead-of-the-curve.html" target="_top">Email the author</a> or <a href="http://via.hypothes.is/http://piccolboni.info//2016/03/how-plyrmr-was-ahead-of-the-curve.html">annotate with hypothes.is</a>
+  </div>
+  <div id="disqus_thread"></div>
+<script>
+
+/**
+ *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+ *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables */
+
+var disqus_config = function () {
+    this.page.url = "http://piccolboni.info//2016/03/how-plyrmr-was-ahead-of-the-curve.html";
+    this.page.identifier = "/2016/03/how-plyrmr-was-ahead-of-the-curve";
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+    var d = document, s = d.createElement('script');
+    s.src = '//piccolbo.disqus.com/embed.js';
+    s.setAttribute('data-timestamp', +new Date());
+    (d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+</div>
+
+      </div>
+    </div>
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <div class="PageNavigation">
+      
+        <a class="prev" href="/2015/09/pipe-operator-for-R.html">&laquo;    Yet Another Pipe Operator in R to unify interactive and programming use</a>
+      
+      
+    </div>
+
+  </div>
+
+</footer>
+
+    <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-7018175-5', 'piccolboni.info');
+  ga('send', 'pageview');
+
+</script>
+
+  </body>
+
+</html>

@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Yet Another Pipe Operator in R to unify interactive and programming use</title>
+  <meta name="description" content="PrologueThe pipe operator, %&gt;% in its latest incarnation, is all the rage in R circles. I first saw it in a less-well-known package called vadr. Then one ...">
+
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="canonical" href="http://piccolboni.info/2015/09/pipe-operator-for-R.html">
+  <link rel="alternate" type="application/rss+xml" title="Antonio Piccolboni" href="http://piccolboni.info/atom.xml" />
+  <link rel="shortcut icon" type="image/png" href="gravatar32.png?v=3">
+  <script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+  </script>
+  <!-- Begin Jekyll SEO tag v1.4.0 -->
+<title>Yet Another Pipe Operator in R to unify interactive and programming use - Antonio Piccolboni</title>
+<meta property="og:title" content="Yet Another Pipe Operator in R to unify interactive and programming use" />
+<meta name="description" content="PrologueThe pipe operator, %&gt;% in its latest incarnation, is all the rage in R circles. I first saw it in a less-well-known package called vadr. Then one was added to dplyr, but I preferred my own implementation when working on plyrmr. Then a dedicated package emerged called magrittr and it became the de-facto standard among pipe lovers when dplyr switched to it. The pipe operator allows to writef(g(g.arg1, g.arg2, ...), f.arg2, ...)asg(g.arg1, g.arg2, ...) %&gt;% f(f.arg2, ...)for any functions f and g. The advantages of this style have been discussed in depth and are not the subject of this post.Critique of Non Standard EvaluationIt should be clear to anyone with a moderate knowledge of R that evaluating f(f.arg2, ...) while taking its first argument from somewhere else requires some form of non standard evaluation (NSE). Standard evaluation would complain about a missing argument or use a default if available. NSE has a long tradition in R going back to base functions such as transform and subset. In the case of those functions, columns of the first argument, always a data frame, can be mentioned by name in other arguments as if they were additional in-scope variables,transform(mtcars, carb/cyl)which is arguably better thantransform(mtcars, &quot;carb/cyl&quot;)ortransform(mtcars, mtcars$carb/mtcars$cyl)The much more recent dplyr has picked up this idiom, improved it and applied it consistently to an organized set of primitives to manipulate data frames. Unfortunately, when one starts programming with these functions, some drawbacks emerge. The first and most obvious one, is that parametrizing arguments is difficult. Imagine we are writing a function that does something on a column, any column of a data frame: function(df, col). In the body of that function, we need to use transform to create a new column that depends on the column identified by col. You may think right off the bat something like transform(df, newcol = col^2), but that would just look for a column named &quot;col&quot;, not anything to deal with the value of the variable col. There are even more subtle problems when using transform in functions nested inside other functions. The documentation for transform is pretty clear about this: “For programming it is better to use the standard subsetting arithmetic functions, and in particular the non-standard evaluation of argument transform [sic, there is no such argument] can have unanticipated consequences”. It seems to me that one of the great strengths of R is that it works both as a UI for people doing statistics as well as a programming language, and creating separate jargons for the two use cases may offer some short term benefits, but in the long run weakens the dual nature of R and makes the transition to programming harder. It’s coding candy: attractive, but not good for your teeth. dplyr offers some relief from this by providing NSE-free versions of the most important functions and a more general NSE implementation. Still, the duality is there and the section of the API using NSE needs to be replicated. That’s big price to pay. Adding that, perplexingly, the names of NSE and NSE-free functions differ only by a cryptic and pretty much invisible _, my opinion is that we can do better than that.magrittr::`%&gt;%` is not immune to the same type of criticism. For instance, one can writelibrary(magrittr)mtcars %&gt;% filter(mpg&gt;15)    mpg cyl  disp  hp drat    wt  qsec vs am gear carb1  21.0   6 160.0 110 3.90 2.620 16.46  0  1    4    42  21.0   6 160.0 110 3.90 2.875 17.02  0  1    4    43  22.8   4 108.0  93 3.85 2.320 18.61  1  1    4    14  21.4   6 258.0 110 3.08 3.215 19.44  1  0    3    15  18.7   8 360.0 175 3.15 3.440 17.02  0  0    3    26  18.1   6 225.0 105 2.76 3.460 20.22  1  0    3    17  24.4   4 146.7  62 3.69 3.190 20.00  1  0    4    2....but notmyfilter = filter(mpg&gt;15)Error in filter_(.data, .dots = lazyeval::lazy_dots(...)): object &#39;mpg&#39; not found# aiming for:# mtcars %&gt;% myfilterwhich means magrittr promotes the use of expressions that are not first class in R, because they are not assignable to a variable, cannot be passed to a function and so forth, which hampers programmability. Moreover, if we enter:4 %&gt;% sqrt(.)[1] 2where . is a special variable evaluating to the left side argument of the %&gt;% operator. Surprisingly, though,4  %&gt;% sqrt(sqrt(.))Error in sqrt(., sqrt(.)): 2 arguments passed to &#39;sqrt&#39; which requires 1fails, showing a lack of composability, an important goal in API design.Critique of purrr reasonGiven these considerations, I wasn’t too surprised when I found that a new package by dplyr’s author, purrr, tries a different approach that avoids NSE. purrr is a package for processing lists inspired by javascript’s underscore.js. A typical function is map, which applies a function to every element of its first argument, for example map(mtcars, class). Besides taking a function, map accepts also a character or a numeric, which it transforms into an accessor function. Moreover, one can pass formulas that provide a quick notation for defining functions and pretty much replace NSE. It only takes a little ~ in front of an expression to explicitly suspend the normal evaluation mechanism and trigger a context-dependent one. It’s a kind of on demand NSE and it expands the use of formulas outside model fitting. Formulas are perfectly set up for this, as they carry with them their intended evaluation environment, making it relatively easy to provide correct implementations that work in any context as opposed to, say, only at top level.A New Pipe OperatorThis gave me an idea: define a NSE-free pipe operator that processes its second argument like purrr::map does with its own. Thus was conceived a new package, yapo, for “Yet Another Pipe Operator”, a name chosen in homage to yacc and to acknowledge the proliferation of pipe operators. Taking dplyr and replacing NSE with the same approach would be equally interesting, but it will have to wait.So how does this pipe operator look like? First of all, very much compatible with the one in magrittr, which is the same as the one in dplyr.mtcars %&gt;% filter(mpg &gt; 15)becomessuppressMessages(library(yapo))mtcars %&gt;% ~filter(mpg &gt; 15)    mpg cyl  disp  hp drat    wt  qsec vs am gear carb1  21.0   6 160.0 110 3.90 2.620 16.46  0  1    4    42  21.0   6 160.0 110 3.90 2.875 17.02  0  1    4    43  22.8   4 108.0  93 3.85 2.320 18.61  1  1    4    14  21.4   6 258.0 110 3.08 3.215 19.44  1  0    3    15  18.7   8 360.0 175 3.15 3.440 17.02  0  0    3    26  18.1   6 225.0 105 2.76 3.460 20.22  1  0    3    17  24.4   4 146.7  62 3.69 3.190 20.00  1  0    4    2....The difference is just one additional ~. This is a small price to pay for seamless parametrizability. Imagine you need to use that filter several times in a program, or pass it as an argument. You can just use a variable:myfilter = ~filter(mpg &gt; 15)mtcars %&gt;% myfilter    mpg cyl  disp  hp drat    wt  qsec vs am gear carb1  21.0   6 160.0 110 3.90 2.620 16.46  0  1    4    42  21.0   6 160.0 110 3.90 2.875 17.02  0  1    4    43  22.8   4 108.0  93 3.85 2.320 18.61  1  1    4    14  21.4   6 258.0 110 3.08 3.215 19.44  1  0    3    15  18.7   8 360.0 175 3.15 3.440 17.02  0  0    3    26  18.1   6 225.0 105 2.76 3.460 20.22  1  0    3    17  24.4   4 146.7  62 3.69 3.190 20.00  1  0    4    2....It just works as expected. Please try that with magrittr and let me know. The best I could come up with wasmyfilter = function(x) filter(x, mpg &gt; 15)which is OK, but different, and that’s the whole point: getting almost the same conciseness as with NSE while developing a jargon, or DSL, that can work for interactive R as well programming in R. Another difference with magrittr is that yapo is meant to be simple in definition and implementation. Hence4 %&gt;% ~sqrt(sqrt(..))[1] 1.414214just works, no excuses. Please notice the use of .. instead of . to avoid confusion with . as used in models.These are use cases suggested by dplyr, but there are others that come from purrr and are here unified in a single operator. What purrr can do on a list of elements, %&gt;% does on a single element. For instance, purrr::map(a.list, a.string) accesses all the elements named after the value of a.string in the elements of list a.list, equivalent topurrr::map(a.list, function(x) x[[a.string]])It may be a small difference, but type the long version many enough times and you are going to be grateful for the shorthand. In analogy with purrr, we can use integer and character vectors on the right side of %&gt;%, implicitly creating an accessor function that gets then applied to the left side, as inmtcars %&gt;% &quot;carb&quot; [1] 4 4 1 1 2 1 4 2 2 4 4 3 3 3 4 4 4 1 2 1 1 2 2 4 2 1 2 2 4 6 8 2which is the same as mtcars[[&quot;carb&quot;]]. You may be protesting that that’s a very small difference, but bear with me a little longer. %&gt;% unifies vector, list, data frame, matrix, S3 and S4 object access. Yes, no more getting errors when using [[]] on S4 objects, enough of that. It works also on 2D data structures such as data frames and matrices, with the help of a couple of functions (credit @ctbrown for this idea). The default is column access. If, instead, row access is desired, one only needs to use the function Row as inmtcars %&gt;% Row(3)$mpg[1] 22.8$cyl[1] 4$disp[1] 108....One can also access multiple columns with the Range function as inmtcars %&gt;% Range(c(&quot;carb&quot;, &quot;cyl&quot;))                    carb cylMazda RX4              4   6Mazda RX4 Wag          4   6Datsun 710             1   4Hornet 4 Drive         1   6Hornet Sportabout      2   8Valiant                1   6Duster 360             4   8....Range and Row can be composed to select a range of rows:mtcars %&gt;% Row(Range(1:4))                mpg cyl disp  hp drat    wt  qsec vs am gear carbMazda RX4      21.0   6  160 110 3.90 2.620 16.46  0  1    4    4Mazda RX4 Wag  21.0   6  160 110 3.90 2.875 17.02  0  1    4    4Datsun 710     22.8   4  108  93 3.85 2.320 18.61  1  1    4    1Hornet 4 Drive 21.4   6  258 110 3.08 3.215 19.44  1  0    3    1When selecting ranges, the result type is always the same as the input type, unlike with [,] and its ill-advised drop option. Of course, selecting ranges in S3 or S4 objects will fail in most cases because it doesn’t make sense. The formula notation keeps working and you can use it to cut down on the typing quite a bit. The evaluation environment of the formula is expanded, as we have seen, with a variable .. but also with a variable for each named element of the left argument of the pipe, in analogy with dplyr. Imagine you have a list of teams of people, each with personal information including a phone, in a three-level nested list (named at all levels).teams =   list(    Avengers =       list(        Annie =           list(            phone = &quot;222-222-2222&quot;),        Paula =           list(            phone = &quot;333-333-3333&quot;)),    EmptyTeam = list())You can access Annie’s phone in team “Avengers” withteams %&gt;% ~Avengers %&gt;% ~Annie %&gt;% ~phone[1] &quot;222-222-2222&quot;which, using with the Rstudio shortcut for %&gt;%, is pretty convenient to type, as opposed toteams[[&quot;Avengers&quot;]][[&quot;Annie&quot;]][[&quot;phone&quot;]][1] &quot;222-222-2222&quot;(6 vs. 18 additional keystrokes, excluding names). Whether it looks better, that’s subjective.The making of yapoWhile a fairly simple package, there were a couple of technical hurdles in implementing yapo. The first is that custom operators in R, the ones that start and end with a %, have higher priority than ~. That would have forced us to protect every formula but the last one in a complex pipe with (). To avoid that, yapo reverses the priority of %&gt;% and ~. It’s a testament to the flexibility of the language that this is at all possible. The other hairy problem was guessing when the first argument of a function is missing, as in filter(mpg &gt; 15). We settled for testing for missing arguments with no defaults. For instance, the .data argument to filter has no default and is not provided in filter(mpg &gt; 15). Hence it is necessary to add the special argument .. and the convention is to add it as the first, unnamed argument, which works well with dplyr functions and many other reasonably designed APIs. It’s a heuristic and if it doesn’t work in some cases you just have to explicitly add .., as in sqrt(sqrt(..)).Thou shalt codeAnd with that, please install yapo and let me know how you like it. Install is as simple as devtools::install_github(&quot;piccolbo/yapo/pkg&quot;). Remember to load after magrittr or dplyr to shadow their own pipe operators." />
+<meta property="og:description" content="PrologueThe pipe operator, %&gt;% in its latest incarnation, is all the rage in R circles. I first saw it in a less-well-known package called vadr. Then one was added to dplyr, but I preferred my own implementation when working on plyrmr. Then a dedicated package emerged called magrittr and it became the de-facto standard among pipe lovers when dplyr switched to it. The pipe operator allows to writef(g(g.arg1, g.arg2, ...), f.arg2, ...)asg(g.arg1, g.arg2, ...) %&gt;% f(f.arg2, ...)for any functions f and g. The advantages of this style have been discussed in depth and are not the subject of this post.Critique of Non Standard EvaluationIt should be clear to anyone with a moderate knowledge of R that evaluating f(f.arg2, ...) while taking its first argument from somewhere else requires some form of non standard evaluation (NSE). Standard evaluation would complain about a missing argument or use a default if available. NSE has a long tradition in R going back to base functions such as transform and subset. In the case of those functions, columns of the first argument, always a data frame, can be mentioned by name in other arguments as if they were additional in-scope variables,transform(mtcars, carb/cyl)which is arguably better thantransform(mtcars, &quot;carb/cyl&quot;)ortransform(mtcars, mtcars$carb/mtcars$cyl)The much more recent dplyr has picked up this idiom, improved it and applied it consistently to an organized set of primitives to manipulate data frames. Unfortunately, when one starts programming with these functions, some drawbacks emerge. The first and most obvious one, is that parametrizing arguments is difficult. Imagine we are writing a function that does something on a column, any column of a data frame: function(df, col). In the body of that function, we need to use transform to create a new column that depends on the column identified by col. You may think right off the bat something like transform(df, newcol = col^2), but that would just look for a column named &quot;col&quot;, not anything to deal with the value of the variable col. There are even more subtle problems when using transform in functions nested inside other functions. The documentation for transform is pretty clear about this: “For programming it is better to use the standard subsetting arithmetic functions, and in particular the non-standard evaluation of argument transform [sic, there is no such argument] can have unanticipated consequences”. It seems to me that one of the great strengths of R is that it works both as a UI for people doing statistics as well as a programming language, and creating separate jargons for the two use cases may offer some short term benefits, but in the long run weakens the dual nature of R and makes the transition to programming harder. It’s coding candy: attractive, but not good for your teeth. dplyr offers some relief from this by providing NSE-free versions of the most important functions and a more general NSE implementation. Still, the duality is there and the section of the API using NSE needs to be replicated. That’s big price to pay. Adding that, perplexingly, the names of NSE and NSE-free functions differ only by a cryptic and pretty much invisible _, my opinion is that we can do better than that.magrittr::`%&gt;%` is not immune to the same type of criticism. For instance, one can writelibrary(magrittr)mtcars %&gt;% filter(mpg&gt;15)    mpg cyl  disp  hp drat    wt  qsec vs am gear carb1  21.0   6 160.0 110 3.90 2.620 16.46  0  1    4    42  21.0   6 160.0 110 3.90 2.875 17.02  0  1    4    43  22.8   4 108.0  93 3.85 2.320 18.61  1  1    4    14  21.4   6 258.0 110 3.08 3.215 19.44  1  0    3    15  18.7   8 360.0 175 3.15 3.440 17.02  0  0    3    26  18.1   6 225.0 105 2.76 3.460 20.22  1  0    3    17  24.4   4 146.7  62 3.69 3.190 20.00  1  0    4    2....but notmyfilter = filter(mpg&gt;15)Error in filter_(.data, .dots = lazyeval::lazy_dots(...)): object &#39;mpg&#39; not found# aiming for:# mtcars %&gt;% myfilterwhich means magrittr promotes the use of expressions that are not first class in R, because they are not assignable to a variable, cannot be passed to a function and so forth, which hampers programmability. Moreover, if we enter:4 %&gt;% sqrt(.)[1] 2where . is a special variable evaluating to the left side argument of the %&gt;% operator. Surprisingly, though,4  %&gt;% sqrt(sqrt(.))Error in sqrt(., sqrt(.)): 2 arguments passed to &#39;sqrt&#39; which requires 1fails, showing a lack of composability, an important goal in API design.Critique of purrr reasonGiven these considerations, I wasn’t too surprised when I found that a new package by dplyr’s author, purrr, tries a different approach that avoids NSE. purrr is a package for processing lists inspired by javascript’s underscore.js. A typical function is map, which applies a function to every element of its first argument, for example map(mtcars, class). Besides taking a function, map accepts also a character or a numeric, which it transforms into an accessor function. Moreover, one can pass formulas that provide a quick notation for defining functions and pretty much replace NSE. It only takes a little ~ in front of an expression to explicitly suspend the normal evaluation mechanism and trigger a context-dependent one. It’s a kind of on demand NSE and it expands the use of formulas outside model fitting. Formulas are perfectly set up for this, as they carry with them their intended evaluation environment, making it relatively easy to provide correct implementations that work in any context as opposed to, say, only at top level.A New Pipe OperatorThis gave me an idea: define a NSE-free pipe operator that processes its second argument like purrr::map does with its own. Thus was conceived a new package, yapo, for “Yet Another Pipe Operator”, a name chosen in homage to yacc and to acknowledge the proliferation of pipe operators. Taking dplyr and replacing NSE with the same approach would be equally interesting, but it will have to wait.So how does this pipe operator look like? First of all, very much compatible with the one in magrittr, which is the same as the one in dplyr.mtcars %&gt;% filter(mpg &gt; 15)becomessuppressMessages(library(yapo))mtcars %&gt;% ~filter(mpg &gt; 15)    mpg cyl  disp  hp drat    wt  qsec vs am gear carb1  21.0   6 160.0 110 3.90 2.620 16.46  0  1    4    42  21.0   6 160.0 110 3.90 2.875 17.02  0  1    4    43  22.8   4 108.0  93 3.85 2.320 18.61  1  1    4    14  21.4   6 258.0 110 3.08 3.215 19.44  1  0    3    15  18.7   8 360.0 175 3.15 3.440 17.02  0  0    3    26  18.1   6 225.0 105 2.76 3.460 20.22  1  0    3    17  24.4   4 146.7  62 3.69 3.190 20.00  1  0    4    2....The difference is just one additional ~. This is a small price to pay for seamless parametrizability. Imagine you need to use that filter several times in a program, or pass it as an argument. You can just use a variable:myfilter = ~filter(mpg &gt; 15)mtcars %&gt;% myfilter    mpg cyl  disp  hp drat    wt  qsec vs am gear carb1  21.0   6 160.0 110 3.90 2.620 16.46  0  1    4    42  21.0   6 160.0 110 3.90 2.875 17.02  0  1    4    43  22.8   4 108.0  93 3.85 2.320 18.61  1  1    4    14  21.4   6 258.0 110 3.08 3.215 19.44  1  0    3    15  18.7   8 360.0 175 3.15 3.440 17.02  0  0    3    26  18.1   6 225.0 105 2.76 3.460 20.22  1  0    3    17  24.4   4 146.7  62 3.69 3.190 20.00  1  0    4    2....It just works as expected. Please try that with magrittr and let me know. The best I could come up with wasmyfilter = function(x) filter(x, mpg &gt; 15)which is OK, but different, and that’s the whole point: getting almost the same conciseness as with NSE while developing a jargon, or DSL, that can work for interactive R as well programming in R. Another difference with magrittr is that yapo is meant to be simple in definition and implementation. Hence4 %&gt;% ~sqrt(sqrt(..))[1] 1.414214just works, no excuses. Please notice the use of .. instead of . to avoid confusion with . as used in models.These are use cases suggested by dplyr, but there are others that come from purrr and are here unified in a single operator. What purrr can do on a list of elements, %&gt;% does on a single element. For instance, purrr::map(a.list, a.string) accesses all the elements named after the value of a.string in the elements of list a.list, equivalent topurrr::map(a.list, function(x) x[[a.string]])It may be a small difference, but type the long version many enough times and you are going to be grateful for the shorthand. In analogy with purrr, we can use integer and character vectors on the right side of %&gt;%, implicitly creating an accessor function that gets then applied to the left side, as inmtcars %&gt;% &quot;carb&quot; [1] 4 4 1 1 2 1 4 2 2 4 4 3 3 3 4 4 4 1 2 1 1 2 2 4 2 1 2 2 4 6 8 2which is the same as mtcars[[&quot;carb&quot;]]. You may be protesting that that’s a very small difference, but bear with me a little longer. %&gt;% unifies vector, list, data frame, matrix, S3 and S4 object access. Yes, no more getting errors when using [[]] on S4 objects, enough of that. It works also on 2D data structures such as data frames and matrices, with the help of a couple of functions (credit @ctbrown for this idea). The default is column access. If, instead, row access is desired, one only needs to use the function Row as inmtcars %&gt;% Row(3)$mpg[1] 22.8$cyl[1] 4$disp[1] 108....One can also access multiple columns with the Range function as inmtcars %&gt;% Range(c(&quot;carb&quot;, &quot;cyl&quot;))                    carb cylMazda RX4              4   6Mazda RX4 Wag          4   6Datsun 710             1   4Hornet 4 Drive         1   6Hornet Sportabout      2   8Valiant                1   6Duster 360             4   8....Range and Row can be composed to select a range of rows:mtcars %&gt;% Row(Range(1:4))                mpg cyl disp  hp drat    wt  qsec vs am gear carbMazda RX4      21.0   6  160 110 3.90 2.620 16.46  0  1    4    4Mazda RX4 Wag  21.0   6  160 110 3.90 2.875 17.02  0  1    4    4Datsun 710     22.8   4  108  93 3.85 2.320 18.61  1  1    4    1Hornet 4 Drive 21.4   6  258 110 3.08 3.215 19.44  1  0    3    1When selecting ranges, the result type is always the same as the input type, unlike with [,] and its ill-advised drop option. Of course, selecting ranges in S3 or S4 objects will fail in most cases because it doesn’t make sense. The formula notation keeps working and you can use it to cut down on the typing quite a bit. The evaluation environment of the formula is expanded, as we have seen, with a variable .. but also with a variable for each named element of the left argument of the pipe, in analogy with dplyr. Imagine you have a list of teams of people, each with personal information including a phone, in a three-level nested list (named at all levels).teams =   list(    Avengers =       list(        Annie =           list(            phone = &quot;222-222-2222&quot;),        Paula =           list(            phone = &quot;333-333-3333&quot;)),    EmptyTeam = list())You can access Annie’s phone in team “Avengers” withteams %&gt;% ~Avengers %&gt;% ~Annie %&gt;% ~phone[1] &quot;222-222-2222&quot;which, using with the Rstudio shortcut for %&gt;%, is pretty convenient to type, as opposed toteams[[&quot;Avengers&quot;]][[&quot;Annie&quot;]][[&quot;phone&quot;]][1] &quot;222-222-2222&quot;(6 vs. 18 additional keystrokes, excluding names). Whether it looks better, that’s subjective.The making of yapoWhile a fairly simple package, there were a couple of technical hurdles in implementing yapo. The first is that custom operators in R, the ones that start and end with a %, have higher priority than ~. That would have forced us to protect every formula but the last one in a complex pipe with (). To avoid that, yapo reverses the priority of %&gt;% and ~. It’s a testament to the flexibility of the language that this is at all possible. The other hairy problem was guessing when the first argument of a function is missing, as in filter(mpg &gt; 15). We settled for testing for missing arguments with no defaults. For instance, the .data argument to filter has no default and is not provided in filter(mpg &gt; 15). Hence it is necessary to add the special argument .. and the convention is to add it as the first, unnamed argument, which works well with dplyr functions and many other reasonably designed APIs. It’s a heuristic and if it doesn’t work in some cases you just have to explicitly add .., as in sqrt(sqrt(..)).Thou shalt codeAnd with that, please install yapo and let me know how you like it. Install is as simple as devtools::install_github(&quot;piccolbo/yapo/pkg&quot;). Remember to load after magrittr or dplyr to shadow their own pipe operators." />
+<link rel="canonical" href="http://piccolboni.info/2015/09/pipe-operator-for-R.html" />
+<meta property="og:url" content="http://piccolboni.info/2015/09/pipe-operator-for-R.html" />
+<meta property="og:site_name" content="Antonio Piccolboni" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2015-09-20T20:38:00-07:00" />
+<link rel="next" href="http://piccolboni.info/2016/03/how-plyrmr-was-ahead-of-the-curve.html" title="How plyrmr was ahead of the curve" />
+<link rel="prev" href="http://piccolboni.info/2015/09/syntax-directed-diffs-for-R-in-R.html" title="Syntax Directed Diffs for R in R" />
+<script type="application/ld+json">
+  {
+    "@context": "http://schema.org",
+    "@type": "BlogPosting",
+    "headline": "Yet Another Pipe Operator in R to unify interactive and programming use",
+    "datePublished": "2015-09-20T20:38:00-07:00",
+    "description": "PrologueThe pipe operator, %&gt;% in its latest incarnation, is all the rage in R circles. I first saw it in a less-well-known package called vadr. Then one was added to dplyr, but I preferred my own implementation when working on plyrmr. Then a dedicated package emerged called magrittr and it became the de-facto standard among pipe lovers when dplyr switched to it. The pipe operator allows to writef(g(g.arg1, g.arg2, ...), f.arg2, ...)asg(g.arg1, g.arg2, ...) %&gt;% f(f.arg2, ...)for any functions f and g. The advantages of this style have been discussed in depth and are not the subject of this post.Critique of Non Standard EvaluationIt should be clear to anyone with a moderate knowledge of R that evaluating f(f.arg2, ...) while taking its first argument from somewhere else requires some form of non standard evaluation (NSE). Standard evaluation would complain about a missing argument or use a default if available. NSE has a long tradition in R going back to base functions such as transform and subset. In the case of those functions, columns of the first argument, always a data frame, can be mentioned by name in other arguments as if they were additional in-scope variables,transform(mtcars, carb/cyl)which is arguably better thantransform(mtcars, &quot;carb/cyl&quot;)ortransform(mtcars, mtcars$carb/mtcars$cyl)The much more recent dplyr has picked up this idiom, improved it and applied it consistently to an organized set of primitives to manipulate data frames. Unfortunately, when one starts programming with these functions, some drawbacks emerge. The first and most obvious one, is that parametrizing arguments is difficult. Imagine we are writing a function that does something on a column, any column of a data frame: function(df, col). In the body of that function, we need to use transform to create a new column that depends on the column identified by col. You may think right off the bat something like transform(df, newcol = col^2), but that would just look for a column named &quot;col&quot;, not anything to deal with the value of the variable col. There are even more subtle problems when using transform in functions nested inside other functions. The documentation for transform is pretty clear about this: “For programming it is better to use the standard subsetting arithmetic functions, and in particular the non-standard evaluation of argument transform [sic, there is no such argument] can have unanticipated consequences”. It seems to me that one of the great strengths of R is that it works both as a UI for people doing statistics as well as a programming language, and creating separate jargons for the two use cases may offer some short term benefits, but in the long run weakens the dual nature of R and makes the transition to programming harder. It’s coding candy: attractive, but not good for your teeth. dplyr offers some relief from this by providing NSE-free versions of the most important functions and a more general NSE implementation. Still, the duality is there and the section of the API using NSE needs to be replicated. That’s big price to pay. Adding that, perplexingly, the names of NSE and NSE-free functions differ only by a cryptic and pretty much invisible _, my opinion is that we can do better than that.magrittr::`%&gt;%` is not immune to the same type of criticism. For instance, one can writelibrary(magrittr)mtcars %&gt;% filter(mpg&gt;15)    mpg cyl  disp  hp drat    wt  qsec vs am gear carb1  21.0   6 160.0 110 3.90 2.620 16.46  0  1    4    42  21.0   6 160.0 110 3.90 2.875 17.02  0  1    4    43  22.8   4 108.0  93 3.85 2.320 18.61  1  1    4    14  21.4   6 258.0 110 3.08 3.215 19.44  1  0    3    15  18.7   8 360.0 175 3.15 3.440 17.02  0  0    3    26  18.1   6 225.0 105 2.76 3.460 20.22  1  0    3    17  24.4   4 146.7  62 3.69 3.190 20.00  1  0    4    2....but notmyfilter = filter(mpg&gt;15)Error in filter_(.data, .dots = lazyeval::lazy_dots(...)): object &#39;mpg&#39; not found# aiming for:# mtcars %&gt;% myfilterwhich means magrittr promotes the use of expressions that are not first class in R, because they are not assignable to a variable, cannot be passed to a function and so forth, which hampers programmability. Moreover, if we enter:4 %&gt;% sqrt(.)[1] 2where . is a special variable evaluating to the left side argument of the %&gt;% operator. Surprisingly, though,4  %&gt;% sqrt(sqrt(.))Error in sqrt(., sqrt(.)): 2 arguments passed to &#39;sqrt&#39; which requires 1fails, showing a lack of composability, an important goal in API design.Critique of purrr reasonGiven these considerations, I wasn’t too surprised when I found that a new package by dplyr’s author, purrr, tries a different approach that avoids NSE. purrr is a package for processing lists inspired by javascript’s underscore.js. A typical function is map, which applies a function to every element of its first argument, for example map(mtcars, class). Besides taking a function, map accepts also a character or a numeric, which it transforms into an accessor function. Moreover, one can pass formulas that provide a quick notation for defining functions and pretty much replace NSE. It only takes a little ~ in front of an expression to explicitly suspend the normal evaluation mechanism and trigger a context-dependent one. It’s a kind of on demand NSE and it expands the use of formulas outside model fitting. Formulas are perfectly set up for this, as they carry with them their intended evaluation environment, making it relatively easy to provide correct implementations that work in any context as opposed to, say, only at top level.A New Pipe OperatorThis gave me an idea: define a NSE-free pipe operator that processes its second argument like purrr::map does with its own. Thus was conceived a new package, yapo, for “Yet Another Pipe Operator”, a name chosen in homage to yacc and to acknowledge the proliferation of pipe operators. Taking dplyr and replacing NSE with the same approach would be equally interesting, but it will have to wait.So how does this pipe operator look like? First of all, very much compatible with the one in magrittr, which is the same as the one in dplyr.mtcars %&gt;% filter(mpg &gt; 15)becomessuppressMessages(library(yapo))mtcars %&gt;% ~filter(mpg &gt; 15)    mpg cyl  disp  hp drat    wt  qsec vs am gear carb1  21.0   6 160.0 110 3.90 2.620 16.46  0  1    4    42  21.0   6 160.0 110 3.90 2.875 17.02  0  1    4    43  22.8   4 108.0  93 3.85 2.320 18.61  1  1    4    14  21.4   6 258.0 110 3.08 3.215 19.44  1  0    3    15  18.7   8 360.0 175 3.15 3.440 17.02  0  0    3    26  18.1   6 225.0 105 2.76 3.460 20.22  1  0    3    17  24.4   4 146.7  62 3.69 3.190 20.00  1  0    4    2....The difference is just one additional ~. This is a small price to pay for seamless parametrizability. Imagine you need to use that filter several times in a program, or pass it as an argument. You can just use a variable:myfilter = ~filter(mpg &gt; 15)mtcars %&gt;% myfilter    mpg cyl  disp  hp drat    wt  qsec vs am gear carb1  21.0   6 160.0 110 3.90 2.620 16.46  0  1    4    42  21.0   6 160.0 110 3.90 2.875 17.02  0  1    4    43  22.8   4 108.0  93 3.85 2.320 18.61  1  1    4    14  21.4   6 258.0 110 3.08 3.215 19.44  1  0    3    15  18.7   8 360.0 175 3.15 3.440 17.02  0  0    3    26  18.1   6 225.0 105 2.76 3.460 20.22  1  0    3    17  24.4   4 146.7  62 3.69 3.190 20.00  1  0    4    2....It just works as expected. Please try that with magrittr and let me know. The best I could come up with wasmyfilter = function(x) filter(x, mpg &gt; 15)which is OK, but different, and that’s the whole point: getting almost the same conciseness as with NSE while developing a jargon, or DSL, that can work for interactive R as well programming in R. Another difference with magrittr is that yapo is meant to be simple in definition and implementation. Hence4 %&gt;% ~sqrt(sqrt(..))[1] 1.414214just works, no excuses. Please notice the use of .. instead of . to avoid confusion with . as used in models.These are use cases suggested by dplyr, but there are others that come from purrr and are here unified in a single operator. What purrr can do on a list of elements, %&gt;% does on a single element. For instance, purrr::map(a.list, a.string) accesses all the elements named after the value of a.string in the elements of list a.list, equivalent topurrr::map(a.list, function(x) x[[a.string]])It may be a small difference, but type the long version many enough times and you are going to be grateful for the shorthand. In analogy with purrr, we can use integer and character vectors on the right side of %&gt;%, implicitly creating an accessor function that gets then applied to the left side, as inmtcars %&gt;% &quot;carb&quot; [1] 4 4 1 1 2 1 4 2 2 4 4 3 3 3 4 4 4 1 2 1 1 2 2 4 2 1 2 2 4 6 8 2which is the same as mtcars[[&quot;carb&quot;]]. You may be protesting that that’s a very small difference, but bear with me a little longer. %&gt;% unifies vector, list, data frame, matrix, S3 and S4 object access. Yes, no more getting errors when using [[]] on S4 objects, enough of that. It works also on 2D data structures such as data frames and matrices, with the help of a couple of functions (credit @ctbrown for this idea). The default is column access. If, instead, row access is desired, one only needs to use the function Row as inmtcars %&gt;% Row(3)$mpg[1] 22.8$cyl[1] 4$disp[1] 108....One can also access multiple columns with the Range function as inmtcars %&gt;% Range(c(&quot;carb&quot;, &quot;cyl&quot;))                    carb cylMazda RX4              4   6Mazda RX4 Wag          4   6Datsun 710             1   4Hornet 4 Drive         1   6Hornet Sportabout      2   8Valiant                1   6Duster 360             4   8....Range and Row can be composed to select a range of rows:mtcars %&gt;% Row(Range(1:4))                mpg cyl disp  hp drat    wt  qsec vs am gear carbMazda RX4      21.0   6  160 110 3.90 2.620 16.46  0  1    4    4Mazda RX4 Wag  21.0   6  160 110 3.90 2.875 17.02  0  1    4    4Datsun 710     22.8   4  108  93 3.85 2.320 18.61  1  1    4    1Hornet 4 Drive 21.4   6  258 110 3.08 3.215 19.44  1  0    3    1When selecting ranges, the result type is always the same as the input type, unlike with [,] and its ill-advised drop option. Of course, selecting ranges in S3 or S4 objects will fail in most cases because it doesn’t make sense. The formula notation keeps working and you can use it to cut down on the typing quite a bit. The evaluation environment of the formula is expanded, as we have seen, with a variable .. but also with a variable for each named element of the left argument of the pipe, in analogy with dplyr. Imagine you have a list of teams of people, each with personal information including a phone, in a three-level nested list (named at all levels).teams =   list(    Avengers =       list(        Annie =           list(            phone = &quot;222-222-2222&quot;),        Paula =           list(            phone = &quot;333-333-3333&quot;)),    EmptyTeam = list())You can access Annie’s phone in team “Avengers” withteams %&gt;% ~Avengers %&gt;% ~Annie %&gt;% ~phone[1] &quot;222-222-2222&quot;which, using with the Rstudio shortcut for %&gt;%, is pretty convenient to type, as opposed toteams[[&quot;Avengers&quot;]][[&quot;Annie&quot;]][[&quot;phone&quot;]][1] &quot;222-222-2222&quot;(6 vs. 18 additional keystrokes, excluding names). Whether it looks better, that’s subjective.The making of yapoWhile a fairly simple package, there were a couple of technical hurdles in implementing yapo. The first is that custom operators in R, the ones that start and end with a %, have higher priority than ~. That would have forced us to protect every formula but the last one in a complex pipe with (). To avoid that, yapo reverses the priority of %&gt;% and ~. It’s a testament to the flexibility of the language that this is at all possible. The other hairy problem was guessing when the first argument of a function is missing, as in filter(mpg &gt; 15). We settled for testing for missing arguments with no defaults. For instance, the .data argument to filter has no default and is not provided in filter(mpg &gt; 15). Hence it is necessary to add the special argument .. and the convention is to add it as the first, unnamed argument, which works well with dplyr functions and many other reasonably designed APIs. It’s a heuristic and if it doesn’t work in some cases you just have to explicitly add .., as in sqrt(sqrt(..)).Thou shalt codeAnd with that, please install yapo and let me know how you like it. Install is as simple as devtools::install_github(&quot;piccolbo/yapo/pkg&quot;). Remember to load after magrittr or dplyr to shadow their own pipe operators.",
+    "url": "http://piccolboni.info/2015/09/pipe-operator-for-R.html"
+  }
+</script>
+<!-- End Jekyll SEO tag -->
+</head>
+
+
+  <body>
+
+    <header class="site-header">
+
+  <div class="wrapper">
+
+    <a class="site-title" href="/">Antonio Piccolboni</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg viewBox="0 0 18 15">
+          <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+
+      <div class="trigger">
+        
+          
+          <a class="page-link" href="/about">About me</a>
+          
+        
+          
+        
+          
+        
+          
+        
+          
+          <a class="page-link" href="/contact">Contact</a>
+          
+        
+          
+        
+          
+        
+          
+          <a class="page-link" href="/projects">Projects</a>
+          
+        
+          
+        
+          
+          <a class="page-link" href="/speaking">Speaking</a>
+          
+        
+          
+          <a class="page-link" href="/writing">Writing</a>
+          
+        
+        <a class="page-link" href="https://feedburner.google.com/fb/a/mailverify?uri=piccolboni/qdqo&amp;loc=en_US">Subscribe</a>
+      </div>
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <div class="page-content">
+      <div class="wrapper">
+        <div class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">Yet Another Pipe Operator in R to unify interactive and programming use</h1>
+    <p class="post-meta">Sep 20, 2015</p>
+  </header>
+
+  <article class="post-content">
+    <div id="prologue" class="section level2">
+<h2>Prologue</h2>
+<p>The <em>pipe operator</em>, <code>%&gt;%</code> in its latest incarnation, is all the rage in R circles. I first saw it in a less-well-known package called <a href="https://github.com/crowding/vadr"><code>vadr</code></a>. Then one was added to <a href="https://github.com/hadley/dplyr"><code>dplyr</code></a>, but I preferred my own implementation when working on <a href="https://github.com/RevolutionAnalytics/plyrmr"><code>plyrmr</code></a>. Then a dedicated package emerged called <a href="http://github.com/smbache/magrittr"><code>magrittr</code></a> and it became the de-facto standard among pipe lovers when <code>dplyr</code> switched to it. The pipe operator allows to write</p>
+<pre><code>f(g(g.arg1, g.arg2, ...), f.arg2, ...)</code></pre>
+<p>as</p>
+<pre><code>g(g.arg1, g.arg2, ...) %&gt;% f(f.arg2, ...)</code></pre>
+<p>for any functions <code>f</code> and <code>g</code>. The advantages of this style have been discussed <a href="http://www.r-statistics.com/2014/08/simpler-r-coding-with-pipes-the-present-and-future-of-the-magrittr-package/">in depth</a> and are not the subject of this post.</p>
+</div>
+<div id="critique-of-non-standard-evaluation" class="section level2">
+<h2>Critique of Non Standard Evaluation</h2>
+<p>It should be clear to anyone with a moderate knowledge of R that evaluating <code>f(f.arg2, ...)</code> while taking its first argument from somewhere else requires some form of non standard evaluation (NSE). Standard evaluation would complain about a missing argument or use a default if available. NSE has a long tradition in R going back to <code>base</code> functions such as <code>transform</code> and <code>subset</code>. In the case of those functions, columns of the first argument, always a data frame, can be mentioned by name in other arguments as if they were additional in-scope variables,</p>
+<pre class="r"><code>transform(mtcars, carb/cyl)</code></pre>
+<p>which is arguably better than</p>
+<pre class="r"><code>transform(mtcars, &quot;carb/cyl&quot;)</code></pre>
+<p>or</p>
+<pre class="r"><code>transform(mtcars, mtcars$carb/mtcars$cyl)</code></pre>
+<p>The much more recent <code>dplyr</code> has picked up this idiom, improved it and applied it consistently to an organized set of primitives to manipulate data frames. Unfortunately, when one starts programming with these functions, some drawbacks emerge. The first and most obvious one, is that parametrizing arguments is difficult. Imagine we are writing a function that does something on a column, any column of a data frame: <code>function(df, col)</code>. In the body of that function, we need to use <code>transform</code> to create a new column that depends on the column identified by <code>col</code>. You may think right off the bat something like <code>transform(df, newcol = col^2)</code>, but that would just look for a column named <code>&quot;col&quot;</code>, not anything to deal with the value of the variable <code>col</code>. There are even more subtle problems when using <code>transform</code> in functions nested inside other functions. The documentation for <code>transform</code> is pretty clear about this: “For programming it is better to use the standard subsetting arithmetic functions, and in particular the non-standard evaluation of argument <code>transform</code> [sic, there is no such argument] can have unanticipated consequences”. It seems to me that one of the great strengths of R is that it works both as a UI for people doing statistics as well as a programming language, and creating separate jargons for the two use cases may offer some short term benefits, but in the long run weakens the dual nature of R and makes the transition to programming harder. It’s coding candy: attractive, but not good for your teeth. <code>dplyr</code> offers some relief from this by providing NSE-free versions of the most important functions and a more general NSE implementation. Still, the duality is there and the section of the API using NSE needs to be replicated. That’s big price to pay. Adding that, perplexingly, the names of NSE and NSE-free functions differ only by a cryptic and pretty much invisible <code>_</code>, my opinion is that we can do better than that.</p>
+<p><code>magrittr::`%&gt;%`</code> is not immune to the same type of criticism. For instance, one can write</p>
+<pre class="r"><code>library(magrittr)
+mtcars %&gt;% filter(mpg&gt;15)</code></pre>
+<pre><code>    mpg cyl  disp  hp drat    wt  qsec vs am gear carb
+1  21.0   6 160.0 110 3.90 2.620 16.46  0  1    4    4
+2  21.0   6 160.0 110 3.90 2.875 17.02  0  1    4    4
+3  22.8   4 108.0  93 3.85 2.320 18.61  1  1    4    1
+4  21.4   6 258.0 110 3.08 3.215 19.44  1  0    3    1
+5  18.7   8 360.0 175 3.15 3.440 17.02  0  0    3    2
+6  18.1   6 225.0 105 2.76 3.460 20.22  1  0    3    1
+7  24.4   4 146.7  62 3.69 3.190 20.00  1  0    4    2
+....</code></pre>
+<p>but not</p>
+<pre class="r"><code>myfilter = filter(mpg&gt;15)</code></pre>
+<pre><code>Error in filter_(.data, .dots = lazyeval::lazy_dots(...)): object 'mpg' not found</code></pre>
+<pre class="r"><code># aiming for:
+# mtcars %&gt;% myfilter</code></pre>
+<p>which means <code>magrittr</code> promotes the use of expressions that are not first class in R, because they are not assignable to a variable, cannot be passed to a function and so forth, which hampers programmability. Moreover, if we enter:</p>
+<pre class="r"><code>4 %&gt;% sqrt(.)</code></pre>
+<pre><code>[1] 2</code></pre>
+<p>where <code>.</code> is a special variable evaluating to the left side argument of the <code>%&gt;%</code> operator. Surprisingly, though,</p>
+<pre class="r"><code>4  %&gt;% sqrt(sqrt(.))</code></pre>
+<pre><code>Error in sqrt(., sqrt(.)): 2 arguments passed to 'sqrt' which requires 1</code></pre>
+<p>fails, showing a lack of <em>composability</em>, an important goal in API design.</p>
+</div>
+<div id="critique-of-purrr-reason" class="section level2">
+<h2>Critique of <code>purrr</code> reason</h2>
+<p>Given these considerations, I wasn’t too surprised when I found that a new package by <code>dplyr</code>’s author, <code>purrr</code>, tries a different approach that avoids NSE. <code>purrr</code> is a package for processing lists inspired by javascript’s <code>underscore.js</code>. A typical function is <code>map</code>, which applies a function to every element of its first argument, for example <code>map(mtcars, class)</code>. Besides taking a function, <code>map</code> accepts also a <code>character</code> or a <code>numeric</code>, which it transforms into an accessor function. Moreover, one can pass formulas that provide a quick notation for defining functions and pretty much replace NSE. It only takes a little <code>~</code> in front of an expression to explicitly suspend the normal evaluation mechanism and trigger a context-dependent one. It’s a kind of on demand NSE and it expands the use of formulas outside model fitting. Formulas are perfectly set up for this, as they carry with them their intended evaluation environment, making it relatively easy to provide correct implementations that work in any context as opposed to, say, only at top level.</p>
+</div>
+<div id="a-new-pipe-operator" class="section level2">
+<h2>A New Pipe Operator</h2>
+<p>This gave me an idea: define a NSE-free pipe operator that processes its second argument like <code>purrr::map</code> does with its own. Thus was conceived a new package, <code>yapo</code>, for “Yet Another Pipe Operator”, a name chosen in homage to <code>yacc</code> and to acknowledge the proliferation of pipe operators. Taking <code>dplyr</code> and replacing NSE with the same approach would be equally interesting, but it will have to wait.</p>
+<p>So how does this pipe operator look like? First of all, very much compatible with the one in <code>magrittr</code>, which is the same as the one in <code>dplyr</code>.</p>
+<pre><code>mtcars %&gt;% filter(mpg &gt; 15)</code></pre>
+<p>becomes</p>
+<pre class="r"><code>suppressMessages(library(yapo))
+mtcars %&gt;% ~filter(mpg &gt; 15)</code></pre>
+<pre><code>    mpg cyl  disp  hp drat    wt  qsec vs am gear carb
+1  21.0   6 160.0 110 3.90 2.620 16.46  0  1    4    4
+2  21.0   6 160.0 110 3.90 2.875 17.02  0  1    4    4
+3  22.8   4 108.0  93 3.85 2.320 18.61  1  1    4    1
+4  21.4   6 258.0 110 3.08 3.215 19.44  1  0    3    1
+5  18.7   8 360.0 175 3.15 3.440 17.02  0  0    3    2
+6  18.1   6 225.0 105 2.76 3.460 20.22  1  0    3    1
+7  24.4   4 146.7  62 3.69 3.190 20.00  1  0    4    2
+....</code></pre>
+<p>The difference is just one additional <code>~</code>. This is a small price to pay for seamless parametrizability. Imagine you need to use that filter several times in a program, or pass it as an argument. You can just use a variable:</p>
+<pre class="r"><code>myfilter = ~filter(mpg &gt; 15)
+mtcars %&gt;% myfilter</code></pre>
+<pre><code>    mpg cyl  disp  hp drat    wt  qsec vs am gear carb
+1  21.0   6 160.0 110 3.90 2.620 16.46  0  1    4    4
+2  21.0   6 160.0 110 3.90 2.875 17.02  0  1    4    4
+3  22.8   4 108.0  93 3.85 2.320 18.61  1  1    4    1
+4  21.4   6 258.0 110 3.08 3.215 19.44  1  0    3    1
+5  18.7   8 360.0 175 3.15 3.440 17.02  0  0    3    2
+6  18.1   6 225.0 105 2.76 3.460 20.22  1  0    3    1
+7  24.4   4 146.7  62 3.69 3.190 20.00  1  0    4    2
+....</code></pre>
+<p>It just works as expected. Please try that with <code>magrittr</code> and let me know. The best I could come up with was</p>
+<pre><code>myfilter = function(x) filter(x, mpg &gt; 15)</code></pre>
+<p>which is OK, but different, and that’s the whole point: getting almost the same conciseness as with NSE while developing a jargon, or DSL, that can work for interactive R as well programming in R. Another difference with <code>magrittr</code> is that <code>yapo</code> is meant to be simple in definition and implementation. Hence</p>
+<pre class="r"><code>4 %&gt;% ~sqrt(sqrt(..))</code></pre>
+<pre><code>[1] 1.414214</code></pre>
+<p>just works, no excuses. Please notice the use of <code>..</code> instead of <code>.</code> to avoid confusion with <code>.</code> as used in models.</p>
+<p>These are use cases suggested by <code>dplyr</code>, but there are others that come from <code>purrr</code> and are here unified in a single operator. What <code>purrr</code> can do on a list of elements, <code>%&gt;%</code> does on a single element. For instance, <code>purrr::map(a.list, a.string)</code> accesses all the elements named after the value of <code>a.string</code> in the elements of list <code>a.list</code>, equivalent to</p>
+<pre><code>purrr::map(a.list, function(x) x[[a.string]])</code></pre>
+<p>It may be a small difference, but type the long version many enough times and you are going to be grateful for the shorthand. In analogy with <code>purrr</code>, we can use integer and character vectors on the right side of <code>%&gt;%</code>, implicitly creating an accessor function that gets then applied to the left side, as in</p>
+<pre class="r"><code>mtcars %&gt;% &quot;carb&quot;</code></pre>
+<pre><code> [1] 4 4 1 1 2 1 4 2 2 4 4 3 3 3 4 4 4 1 2 1 1 2 2 4 2 1 2 2 4 6 8 2</code></pre>
+<p>which is the same as <code>mtcars[[&quot;carb&quot;]]</code>. You may be protesting that that’s a very small difference, but bear with me a little longer. <code>%&gt;%</code> unifies vector, list, data frame, matrix, S3 and S4 object access. Yes, no more getting errors when using <code>[[]]</code> on S4 objects, enough of that. It works also on 2D data structures such as data frames and matrices, with the help of a couple of functions (credit <span class="citation">@ctbrown</span> for this idea). The default is column access. If, instead, row access is desired, one only needs to use the function <code>Row</code> as in</p>
+<pre class="r"><code>mtcars %&gt;% Row(3)</code></pre>
+<pre><code>$mpg
+[1] 22.8
+
+$cyl
+[1] 4
+
+$disp
+[1] 108
+....</code></pre>
+<p>One can also access multiple columns with the <code>Range</code> function as in</p>
+<pre class="r"><code>mtcars %&gt;% Range(c(&quot;carb&quot;, &quot;cyl&quot;))</code></pre>
+<pre><code>                    carb cyl
+Mazda RX4              4   6
+Mazda RX4 Wag          4   6
+Datsun 710             1   4
+Hornet 4 Drive         1   6
+Hornet Sportabout      2   8
+Valiant                1   6
+Duster 360             4   8
+....</code></pre>
+<p><code>Range</code> and <code>Row</code> can be composed to select a range of rows:</p>
+<pre class="r"><code>mtcars %&gt;% Row(Range(1:4))</code></pre>
+<pre><code>                mpg cyl disp  hp drat    wt  qsec vs am gear carb
+Mazda RX4      21.0   6  160 110 3.90 2.620 16.46  0  1    4    4
+Mazda RX4 Wag  21.0   6  160 110 3.90 2.875 17.02  0  1    4    4
+Datsun 710     22.8   4  108  93 3.85 2.320 18.61  1  1    4    1
+Hornet 4 Drive 21.4   6  258 110 3.08 3.215 19.44  1  0    3    1</code></pre>
+<p>When selecting ranges, the result type is always the same as the input type, unlike with <code>[,]</code> and its ill-advised <code>drop</code> option. Of course, selecting ranges in S3 or S4 objects will fail in most cases because it doesn’t make sense. The formula notation keeps working and you can use it to cut down on the typing quite a bit. The evaluation environment of the formula is expanded, as we have seen, with a variable <code>..</code> but also with a variable for each named element of the left argument of the pipe, in analogy with <code>dplyr</code>. Imagine you have a list of teams of people, each with personal information including a phone, in a three-level nested list (named at all levels).</p>
+<pre class="r"><code>teams = 
+  list(
+    Avengers = 
+      list(
+        Annie = 
+          list(
+            phone = &quot;222-222-2222&quot;),
+        Paula = 
+          list(
+            phone = &quot;333-333-3333&quot;)),
+    EmptyTeam = list())</code></pre>
+<p>You can access Annie’s phone in team “Avengers” with</p>
+<pre class="r"><code>teams %&gt;% ~Avengers %&gt;% ~Annie %&gt;% ~phone</code></pre>
+<pre><code>[1] &quot;222-222-2222&quot;</code></pre>
+<p>which, using with the Rstudio shortcut for <code>%&gt;%</code>, is pretty convenient to type, as opposed to</p>
+<pre class="r"><code>teams[[&quot;Avengers&quot;]][[&quot;Annie&quot;]][[&quot;phone&quot;]]</code></pre>
+<pre><code>[1] &quot;222-222-2222&quot;</code></pre>
+<p>(6 vs. 18 additional keystrokes, excluding names). Whether it looks better, that’s subjective.</p>
+</div>
+<div id="the-making-of-yapo" class="section level2">
+<h2>The making of <code>yapo</code></h2>
+<p>While a fairly simple package, there were a couple of technical hurdles in implementing <code>yapo</code>. The first is that custom operators in R, the ones that start and end with a <code>%</code>, have higher priority than <code>~</code>. That would have forced us to protect every formula but the last one in a complex pipe with <code>()</code>. To avoid that, <code>yapo</code> reverses the priority of <code>%&gt;%</code> and <code>~</code>. It’s a testament to the flexibility of the language that this is at all possible. The other hairy problem was guessing when the first argument of a function is missing, as in <code>filter(mpg &gt; 15)</code>. We settled for testing for missing arguments with no defaults. For instance, the <code>.data</code> argument to <code>filter</code> has no default and is not provided in <code>filter(mpg &gt; 15)</code>. Hence it is necessary to add the special argument <code>..</code> and the convention is to add it as the first, unnamed argument, which works well with <code>dplyr</code> functions and many other reasonably designed APIs. It’s a heuristic and if it doesn’t work in some cases you just have to explicitly add <code>..</code>, as in <code>sqrt(sqrt(..))</code>.</p>
+</div>
+<div id="thou-shalt-code" class="section level2">
+<h2>Thou shalt code</h2>
+<p>And with that, please install <code>yapo</code> and let me know how you like it. Install is as simple as <code>devtools::install_github(&quot;piccolbo/yapo/pkg&quot;)</code>. Remember to load after <code>magrittr</code> or <code>dplyr</code> to shadow their own pipe operators.</p>
+</div>
+
+
+  </article>
+
+  <div class="SendComment">
+    <a href="mailto:antonio@piccolboni.info?subject=Yet Another Pipe Operator in R to unify interactive and programming use&body=http://piccolboni.info/2015/09/pipe-operator-for-R.html" target="_top">Email the author</a> or <a href="http://via.hypothes.is/http://piccolboni.info//2015/09/pipe-operator-for-R.html">annotate with hypothes.is</a>
+  </div>
+  <div id="disqus_thread"></div>
+<script>
+
+/**
+ *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+ *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables */
+
+var disqus_config = function () {
+    this.page.url = "http://piccolboni.info//2015/09/pipe-operator-for-R.html";
+    this.page.identifier = "/2015/09/pipe-operator-for-R";
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+    var d = document, s = d.createElement('script');
+    s.src = '//piccolbo.disqus.com/embed.js';
+    s.setAttribute('data-timestamp', +new Date());
+    (d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+</div>
+
+      </div>
+    </div>
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <div class="PageNavigation">
+      
+        <a class="prev" href="/2015/09/syntax-directed-diffs-for-R-in-R.html">&laquo;    Syntax Directed Diffs for R in R</a>
+      
+      
+        <a class="next" href="/2016/03/how-plyrmr-was-ahead-of-the-curve.html">How plyrmr was ahead of the curve &raquo;</a>
+      
+    </div>
+
+  </div>
+
+</footer>
+
+    <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-7018175-5', 'piccolboni.info');
+  ga('send', 'pageview');
+
+</script>
+
+  </body>
+
+</html>

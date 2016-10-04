@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>An algorithm for sample quantiles in map reduce</title>
+  <meta name="description" content="A simple but often occurring problem is computing sample quantiles, sometimes named top $k$ elements, in a large data set. Here I show a solution for the Map...">
+
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="canonical" href="http://piccolboni.info/2010/07/algorithm-for-sample-quantiles-in-map.html">
+  <link rel="alternate" type="application/rss+xml" title="Antonio Piccolboni" href="http://piccolboni.info/atom.xml" />
+  <link rel="shortcut icon" type="image/png" href="gravatar32.png?v=3">
+  <script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+  </script>
+  <!-- Begin Jekyll SEO tag v1.4.0 -->
+<title>An algorithm for sample quantiles in map reduce - Antonio Piccolboni</title>
+<meta property="og:title" content="An algorithm for sample quantiles in map reduce" />
+<meta name="description" content="A simple but often occurring problem is computing sample quantiles, sometimes named top $k$ elements, in a large data set. Here I show a solution for the MapReduce model of computation.The standard in memory algorithm for this problem is similar to quicksort, with the main difference that only one branch of the recursion is followed. An important detail is that if we are looking for the top $k$ element, after the pivoting phase we might still be looking for it among the $m$ elements higher than the pivot, if $m \geq k$, but if that&#39;s not the case then we need to look for the top $k-m$ element among the elements smaller than the pivot. This is slightly more complicated to state in terms of quantiles, but the idea is the same. To port this algorithm to the map reduce model, we need to avoid pivoting, which requires random access, and adopt a style more similar to that of streaming algorithms. Pivoting is replaced by a combination of counting and filtering. In each iteration, we maintain an upper and  lower bound for the quantile of interest. To refine it, we split that interval in half at a threshold $t$. We count how many data points are above the threshold. If that indicates that the target quantile is higher than the threshold, it becomes our new lower bound, otherwise we update the upper bound. Now we could simply go for a new pass, until upper and lower bound identify only one value in the sample (it could be repeated multiple times though), but if writing is not too costly and we have spare disk space, we can write out only the elements that are in between the upper and lower bound, bringing the complexity from $O(n \log(n))$ to $O(n)$. In the filtered sample we will be looking for a different quantile.To add some detail, this is how the counting happens (using a combiner is mandatory for this algorithm, or the only two reducers will have to process the whole dataset):def map(v):  if (v &lt;= t):    return [(T, 1)]  else:    return [(F, 1)]def reduce(list):  sum = 0  for (is_low, count) in list:    sum += count  return[(is_low, sum)]This is the filtering, just for completeness sake. def map(v):  if (lower &lt;= v &lt; upper)    return [v]  else:    return []And this is the update rule for the bounds and quantile values: def bounds(u, l, t, ca, cb, q):  # u, l: quantile upper and lower bounds  # t: threshold  # ca, cb: count of values above and below threshold  # q: desired quantile  n = ca + cb  topk = (1 - q) * n  if topk &lt;= ca:    l = t    q =  1 - topk/ca  else:    u = t    q = 1 - (topk - ca)/cb  t = floor(u + l / 2)  return (u, l, t, q)There is a little more work to glue everything together, but it should be clear at this point. The algorithm terminates when the max and min of the current filtered sample are equal. An optimization is to use more than one threshold during each iteration. This allows to trade iterations with memory usage. More precisely, we could maintain as many bins as memory allows and perform the counting bin by bin. Once this is done, we pick the bin that contains the quantile, split its range into equal sized bins and repeat. Filtering works exactly the same way as above.   A couple of observations about the applications of this algorithm. Often we are trying to estimate a quantile from a distribution from which the data is sampled. In that case, calculating a sample quantile is only the start. As estimates of distribution quantiles, sample quantiles are biased towards the median and without confidence intervals or other measure of variability we don&#39;t know anything about their variability. To obtain confidence intervals for any quantile one can use the technique explained here and for extreme quantiles special techniques might give better results. In both cases we need to extract sample quantiles as an intermediate step, so the algorithm described here can be useful, but not necessarily from the whole dataset. We might opt for a single pass map reduce subsampling step followed by in memory analysis and get a tight enough confidence interval faster and using fewer resources. The best trade off between precision, speed and resources is application dependent.This post was inspired by a job interview question, where we covered in memory algorithms and only hinted at the mapreduce solution, but I thought it would be interesting to write it down.CommentsjkffAntonio, you may be interested in the QDigest datastructure, which can compute approximate quantiles (and much more) with very little memory, and also has the additivity property - you can combine two QDigest&#39;s for parts of a collection of numbers, giving a QDigest for the whole collection. So I think it&#39;s a perfect fit for mapreduce too.http://www.cs.virginia.edu/~son/cs851/papers/ucsb.sensys04.pdfetc." />
+<meta property="og:description" content="A simple but often occurring problem is computing sample quantiles, sometimes named top $k$ elements, in a large data set. Here I show a solution for the MapReduce model of computation.The standard in memory algorithm for this problem is similar to quicksort, with the main difference that only one branch of the recursion is followed. An important detail is that if we are looking for the top $k$ element, after the pivoting phase we might still be looking for it among the $m$ elements higher than the pivot, if $m \geq k$, but if that&#39;s not the case then we need to look for the top $k-m$ element among the elements smaller than the pivot. This is slightly more complicated to state in terms of quantiles, but the idea is the same. To port this algorithm to the map reduce model, we need to avoid pivoting, which requires random access, and adopt a style more similar to that of streaming algorithms. Pivoting is replaced by a combination of counting and filtering. In each iteration, we maintain an upper and  lower bound for the quantile of interest. To refine it, we split that interval in half at a threshold $t$. We count how many data points are above the threshold. If that indicates that the target quantile is higher than the threshold, it becomes our new lower bound, otherwise we update the upper bound. Now we could simply go for a new pass, until upper and lower bound identify only one value in the sample (it could be repeated multiple times though), but if writing is not too costly and we have spare disk space, we can write out only the elements that are in between the upper and lower bound, bringing the complexity from $O(n \log(n))$ to $O(n)$. In the filtered sample we will be looking for a different quantile.To add some detail, this is how the counting happens (using a combiner is mandatory for this algorithm, or the only two reducers will have to process the whole dataset):def map(v):  if (v &lt;= t):    return [(T, 1)]  else:    return [(F, 1)]def reduce(list):  sum = 0  for (is_low, count) in list:    sum += count  return[(is_low, sum)]This is the filtering, just for completeness sake. def map(v):  if (lower &lt;= v &lt; upper)    return [v]  else:    return []And this is the update rule for the bounds and quantile values: def bounds(u, l, t, ca, cb, q):  # u, l: quantile upper and lower bounds  # t: threshold  # ca, cb: count of values above and below threshold  # q: desired quantile  n = ca + cb  topk = (1 - q) * n  if topk &lt;= ca:    l = t    q =  1 - topk/ca  else:    u = t    q = 1 - (topk - ca)/cb  t = floor(u + l / 2)  return (u, l, t, q)There is a little more work to glue everything together, but it should be clear at this point. The algorithm terminates when the max and min of the current filtered sample are equal. An optimization is to use more than one threshold during each iteration. This allows to trade iterations with memory usage. More precisely, we could maintain as many bins as memory allows and perform the counting bin by bin. Once this is done, we pick the bin that contains the quantile, split its range into equal sized bins and repeat. Filtering works exactly the same way as above.   A couple of observations about the applications of this algorithm. Often we are trying to estimate a quantile from a distribution from which the data is sampled. In that case, calculating a sample quantile is only the start. As estimates of distribution quantiles, sample quantiles are biased towards the median and without confidence intervals or other measure of variability we don&#39;t know anything about their variability. To obtain confidence intervals for any quantile one can use the technique explained here and for extreme quantiles special techniques might give better results. In both cases we need to extract sample quantiles as an intermediate step, so the algorithm described here can be useful, but not necessarily from the whole dataset. We might opt for a single pass map reduce subsampling step followed by in memory analysis and get a tight enough confidence interval faster and using fewer resources. The best trade off between precision, speed and resources is application dependent.This post was inspired by a job interview question, where we covered in memory algorithms and only hinted at the mapreduce solution, but I thought it would be interesting to write it down.CommentsjkffAntonio, you may be interested in the QDigest datastructure, which can compute approximate quantiles (and much more) with very little memory, and also has the additivity property - you can combine two QDigest&#39;s for parts of a collection of numbers, giving a QDigest for the whole collection. So I think it&#39;s a perfect fit for mapreduce too.http://www.cs.virginia.edu/~son/cs851/papers/ucsb.sensys04.pdfetc." />
+<link rel="canonical" href="http://piccolboni.info/2010/07/algorithm-for-sample-quantiles-in-map.html" />
+<meta property="og:url" content="http://piccolboni.info/2010/07/algorithm-for-sample-quantiles-in-map.html" />
+<meta property="og:site_name" content="Antonio Piccolboni" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2010-07-27T00:00:00-07:00" />
+<link rel="next" href="http://piccolboni.info/2010/09/thoughts-on-ab-testing.html" title="Thoughts on A/B testing" />
+<link rel="prev" href="http://piccolboni.info/2010/07/map-reduce-algorithm-for-connected.html" title="A map reduce algorithm for connected components" />
+<script type="application/ld+json">
+  {
+    "@context": "http://schema.org",
+    "@type": "BlogPosting",
+    "headline": "An algorithm for sample quantiles in map reduce",
+    "datePublished": "2010-07-27T00:00:00-07:00",
+    "description": "A simple but often occurring problem is computing sample quantiles, sometimes named top $k$ elements, in a large data set. Here I show a solution for the MapReduce model of computation.The standard in memory algorithm for this problem is similar to quicksort, with the main difference that only one branch of the recursion is followed. An important detail is that if we are looking for the top $k$ element, after the pivoting phase we might still be looking for it among the $m$ elements higher than the pivot, if $m \\geq k$, but if that&#39;s not the case then we need to look for the top $k-m$ element among the elements smaller than the pivot. This is slightly more complicated to state in terms of quantiles, but the idea is the same. To port this algorithm to the map reduce model, we need to avoid pivoting, which requires random access, and adopt a style more similar to that of streaming algorithms. Pivoting is replaced by a combination of counting and filtering. In each iteration, we maintain an upper and  lower bound for the quantile of interest. To refine it, we split that interval in half at a threshold $t$. We count how many data points are above the threshold. If that indicates that the target quantile is higher than the threshold, it becomes our new lower bound, otherwise we update the upper bound. Now we could simply go for a new pass, until upper and lower bound identify only one value in the sample (it could be repeated multiple times though), but if writing is not too costly and we have spare disk space, we can write out only the elements that are in between the upper and lower bound, bringing the complexity from $O(n \\log(n))$ to $O(n)$. In the filtered sample we will be looking for a different quantile.To add some detail, this is how the counting happens (using a combiner is mandatory for this algorithm, or the only two reducers will have to process the whole dataset):def map(v):  if (v &lt;= t):    return [(T, 1)]  else:    return [(F, 1)]def reduce(list):  sum = 0  for (is_low, count) in list:    sum += count  return[(is_low, sum)]This is the filtering, just for completeness sake. def map(v):  if (lower &lt;= v &lt; upper)    return [v]  else:    return []And this is the update rule for the bounds and quantile values: def bounds(u, l, t, ca, cb, q):  # u, l: quantile upper and lower bounds  # t: threshold  # ca, cb: count of values above and below threshold  # q: desired quantile  n = ca + cb  topk = (1 - q) * n  if topk &lt;= ca:    l = t    q =  1 - topk/ca  else:    u = t    q = 1 - (topk - ca)/cb  t = floor(u + l / 2)  return (u, l, t, q)There is a little more work to glue everything together, but it should be clear at this point. The algorithm terminates when the max and min of the current filtered sample are equal. An optimization is to use more than one threshold during each iteration. This allows to trade iterations with memory usage. More precisely, we could maintain as many bins as memory allows and perform the counting bin by bin. Once this is done, we pick the bin that contains the quantile, split its range into equal sized bins and repeat. Filtering works exactly the same way as above.   A couple of observations about the applications of this algorithm. Often we are trying to estimate a quantile from a distribution from which the data is sampled. In that case, calculating a sample quantile is only the start. As estimates of distribution quantiles, sample quantiles are biased towards the median and without confidence intervals or other measure of variability we don&#39;t know anything about their variability. To obtain confidence intervals for any quantile one can use the technique explained here and for extreme quantiles special techniques might give better results. In both cases we need to extract sample quantiles as an intermediate step, so the algorithm described here can be useful, but not necessarily from the whole dataset. We might opt for a single pass map reduce subsampling step followed by in memory analysis and get a tight enough confidence interval faster and using fewer resources. The best trade off between precision, speed and resources is application dependent.This post was inspired by a job interview question, where we covered in memory algorithms and only hinted at the mapreduce solution, but I thought it would be interesting to write it down.CommentsjkffAntonio, you may be interested in the QDigest datastructure, which can compute approximate quantiles (and much more) with very little memory, and also has the additivity property - you can combine two QDigest&#39;s for parts of a collection of numbers, giving a QDigest for the whole collection. So I think it&#39;s a perfect fit for mapreduce too.http://www.cs.virginia.edu/~son/cs851/papers/ucsb.sensys04.pdfetc.",
+    "url": "http://piccolboni.info/2010/07/algorithm-for-sample-quantiles-in-map.html"
+  }
+</script>
+<!-- End Jekyll SEO tag -->
+</head>
+
+
+  <body>
+
+    <header class="site-header">
+
+  <div class="wrapper">
+
+    <a class="site-title" href="/">Antonio Piccolboni</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg viewBox="0 0 18 15">
+          <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+
+      <div class="trigger">
+        
+          
+          <a class="page-link" href="/about">About me</a>
+          
+        
+          
+        
+          
+        
+          
+        
+          
+          <a class="page-link" href="/contact">Contact</a>
+          
+        
+          
+        
+          
+        
+          
+          <a class="page-link" href="/projects">Projects</a>
+          
+        
+          
+        
+          
+          <a class="page-link" href="/speaking">Speaking</a>
+          
+        
+          
+          <a class="page-link" href="/writing">Writing</a>
+          
+        
+        <a class="page-link" href="https://feedburner.google.com/fb/a/mailverify?uri=piccolboni/qdqo&amp;loc=en_US">Subscribe</a>
+      </div>
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <div class="page-content">
+      <div class="wrapper">
+        <div class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">An algorithm for sample quantiles in map reduce</h1>
+    <p class="post-meta">Jul 27, 2010</p>
+  </header>
+
+  <article class="post-content">
+    <div class='post'>
+A simple but often occurring problem is computing <i>sample quantiles</i>, sometimes named <i>top $k$ elements</i>, in a large data set. Here I show a solution for the MapReduce model of computation.<br /><!--more--><a name='more'></a><br />The standard in memory algorithm for this problem is similar to quicksort, with the main difference that only one branch of the recursion is followed. An important detail is that if we are looking for the top $k$ element, after the pivoting phase we might still be looking for it among the $m$ elements higher than the pivot, if $m \geq k$, but if that's not the case then we need to look for the top $k-m$ element among the elements smaller than the pivot. This is slightly more complicated to state in terms of quantiles, but the idea is the same. To port this algorithm to the map reduce model, we need to avoid pivoting, which requires random access, and adopt a style more similar to that of <i>streaming algorithms</i>. Pivoting is replaced by a combination of counting and filtering. In each iteration, we maintain an upper and  lower bound for the quantile of interest. To refine it, we split that interval in half at a threshold $t$. We count how many data points are above the threshold. If that indicates that the target quantile is higher than the threshold, it becomes our new lower bound, otherwise we update the upper bound. Now we could simply go for a new pass, until upper and lower bound identify only one value in the sample (it could be repeated multiple times though), but if writing is not too costly and we have spare disk space, we can write out only the elements that are in between the upper and lower bound, bringing the complexity from $O(n \log(n))$ to $O(n)$. In the filtered sample we will be looking for a different quantile.<br /><br />To add some detail, this is how the counting happens (using a combiner is mandatory for this algorithm, or the only two reducers will have to process the whole dataset):<br /><pre class="brush: python">def map(v):<br />  if (v <= t):<br />    return [(T, 1)]<br />  else:<br />    return [(F, 1)]<br /></pre><pre class="brush: python">def reduce(list):<br />  sum = 0<br />  for (is_low, count) in list:<br />    sum += count<br />  return[(is_low, sum)]<br /></pre>This is the filtering, just for completeness sake. <pre class="brush: python">def map(v):<br />  if (lower <= v < upper)<br />    return [v]<br />  else:<br />    return []<br /></pre>And this is the update rule for the bounds and quantile values: <pre class="brush: python">def bounds(u, l, t, ca, cb, q):<br />  # u, l: quantile upper and lower bounds<br />  # t: threshold<br />  # ca, cb: count of values above and below threshold<br />  # q: desired quantile<br />  n = ca + cb<br />  topk = (1 - q) * n<br />  if topk <= ca:<br />    l = t<br />    q =  1 - topk/ca<br />  else:<br />    u = t<br />    q = 1 - (topk - ca)/cb<br />  t = floor(u + l / 2)<br />  return (u, l, t, q)<br /></pre>There is a little more work to glue everything together, but it should be clear at this point. The algorithm terminates when the max and min of the current filtered sample are equal. An optimization is to use more than one threshold during each iteration. This allows to trade iterations with memory usage. More precisely, we could maintain as many bins as memory allows and perform the counting bin by bin. Once this is done, we pick the bin that contains the quantile, split its range into equal sized bins and repeat. Filtering works exactly the same way as above.   <p>A couple of observations about the applications of this algorithm. Often we are trying to estimate a quantile from a distribution from which the data is sampled. In that case, calculating a sample quantile is only the start. As estimates of distribution quantiles, sample quantiles are biased towards the median and without confidence intervals or other measure of variability we don't know anything about their variability. To obtain confidence intervals for any quantile one can use the technique explained <a href="http://turing.une.edu.au/~stat354/notes/node72.html">here</a> and for extreme quantiles <a href="http://cran.r-project.org/web/packages/evir/index.html">special techniques</a> might give better results. In both cases we need to extract sample quantiles as an intermediate step, so the algorithm described here can be useful, but not necessarily from the whole dataset. We might opt for a single pass map reduce subsampling step followed by in memory analysis and get a tight enough confidence interval faster and using fewer resources. The best trade off between precision, speed and resources is application dependent.</p><p>This post was inspired by a job interview question, where we covered in memory algorithms and only hinted at the mapreduce solution, but I thought it would be interesting to write it down.</div>
+<h2>Comments</h2>
+<div class='comments'>
+<div class='comment'>
+<div class='author'>jkff</div>
+<div class='content'>
+Antonio, you may be interested in the QDigest datastructure, which can compute approximate quantiles (and much more) with very little memory, and also has the additivity property - you can combine two QDigest&#39;s for parts of a collection of numbers, giving a QDigest for the whole collection. So I think it&#39;s a perfect fit for mapreduce too.<br /><br />http://www.cs.virginia.edu/~son/cs851/papers/ucsb.sensys04.pdf<br />etc.</div>
+</div>
+</div>
+
+  </article>
+
+  <div class="SendComment">
+    <a href="mailto:antonio@piccolboni.info?subject=An algorithm for sample quantiles in map reduce&body=http://piccolboni.info/2010/07/algorithm-for-sample-quantiles-in-map.html" target="_top">Email the author</a> or <a href="http://via.hypothes.is/http://piccolboni.info//2010/07/algorithm-for-sample-quantiles-in-map.html">annotate with hypothes.is</a>
+  </div>
+  <div id="disqus_thread"></div>
+<script>
+
+/**
+ *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+ *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables */
+
+var disqus_config = function () {
+    this.page.url = "http://piccolboni.info//2010/07/algorithm-for-sample-quantiles-in-map.html";
+    this.page.identifier = "/2010/07/algorithm-for-sample-quantiles-in-map";
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+    var d = document, s = d.createElement('script');
+    s.src = '//piccolbo.disqus.com/embed.js';
+    s.setAttribute('data-timestamp', +new Date());
+    (d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+</div>
+
+      </div>
+    </div>
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <div class="PageNavigation">
+      
+        <a class="prev" href="/2010/07/map-reduce-algorithm-for-connected.html">&laquo;    A map reduce algorithm for connected components</a>
+      
+      
+        <a class="next" href="/2010/09/thoughts-on-ab-testing.html">Thoughts on A/B testing &raquo;</a>
+      
+    </div>
+
+  </div>
+
+</footer>
+
+    <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-7018175-5', 'piccolboni.info');
+  ga('send', 'pageview');
+
+</script>
+
+  </body>
+
+</html>
