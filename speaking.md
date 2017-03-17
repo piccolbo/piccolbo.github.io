@@ -21,7 +21,7 @@ Below is a list of my speaking engagements and here is a <a href="http://www.you
 | 07/02/2014 |  UCLA | [The R User Conference](http://user2014.stat.ucla.edu/)  | [Plyrmr: a data manipulation DSL for big data](http://user2014.stat.ucla.edu/abstracts/talks/103_Piccolboni.pdf)
 | 02/17/2014 | Bay Area UseR Group | <a href="http://www.meetup.com/R-Users/events/165628062/">Meetup</a> | plyrmr, Hadoop Mapreduce for the rest of us. |
 | 10/28/2013 | O'Reilly | <a href="http://strataconf.com/stratany2013/public/schedule/detail/30632">Strata Conference</a> | Using R and Hadoop for statistical computation at scale. (Tutorial with Joseph Rickert)
-| 10/10/2013 | Los Angeles Hadoop User Group | <a href="http://www.meetup.com/LA-HUG/events/140572752/"> Meetup </a> | <a href=http://www.ustream.tv/recorded/39729279>Making R play well with Hadoop</a>. (with David Champagne)
+| 10/10/2013 | Los Angeles Hadoop User Group | <a href="http://www.meetup.com/LA-HUG/events/140572752/"> Meetup </a> | Making R play well with Hadoop. (with David Champagne)
 | 05/15/2013 | Orange County Hadoop User Group | <a href="http://www.meetup.com/OC-HUG/events/113336802/">On line meetup</a> | <a href="https://www.youtube.com/watch?v=wxLo5q1Wu9M"> R and Hadoop</a>
 | 01/24/2013 | SF Data Mining | <a href="http://www.meetup.com/Data-Mining/events/95404242/">Meetup</a> | [Scalable Analytics in R with rmr](https://www.youtube.com/watch?v=KdL80919pKg)
 | 10/13/2012 | ACM Bay Area Chapter | <a href="http://www.sfbayacm.org/proposed-sessions-data-mining-camp-%E2%80%93-october-2012">Data Mining Camp</a> | RHadoop
