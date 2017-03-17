@@ -29,7 +29,7 @@ Below is a list of my speaking engagements and here is a <a href="http://www.you
 | 06/14/2012 | Vanderbilt University | <a href="http://biostat.mc.vanderbilt.edu/wiki/Main/UseR-2012">use R!</a> | <a href="http://biostat.mc.vanderbilt.edu/wiki/pub/Main/UseR-2012/125-Piccolboni.pdf">Slicing and dicing big data with RHadoop-rmr</a>
 | 05/02/2012 | Revolution Analytics | Webinar | <a href="http://www.revolutionanalytics.com/news-events/free-webinars/2012/r-and-hadoop-equals-big-data-analytics/">R + Hadoop = Big Data Analytics </a>
 | 03/02/2012 | Linkedin | Seminar | RHadoop and rmr -- mapreduce in R
-| 02/29/2012 | O'Reilly | <a href="http://strataconf.com/strata2012/public/schedule/detail/22548">Strata Conference</a> | <a href="https://conferences.oreilly.com/strata/strata2012/public/schedule/detail/22548">RHadoop, R meets Hadoop</a>
+| 02/29/2012 | O'Reilly | <a href="http://strataconf.com/strata2012/">Strata Conference</a> | <a href="https://conferences.oreilly.com/strata/strata2012/public/schedule/detail/22548">RHadoop, R meets Hadoop</a>
 | 01/18/2012 | Yahoo! | Bay Area Hadoop Meetup | <a href="http://www.meetup.com/hadoop/events/37330242/">RHadoop, Hadoop for R</a>
 | 12/08/2011 | University of California, Berkeley, Dept. of Statistics | Statistics and Genomics Seminar | <a href="http://events.berkeley.edu/index.php/calendar/sn/ccb.html?event_ID=49467&amp;date=2011-12-08">RHadoop, the Marriage of R and Hadoop</a>
 | 11/09/2011 | Cloudera | Hadoop World | <a href="http://www.hadoopworld.com/session/the-powerful-marriage-of-r-and-hadoop/">The Powerful Marriage of R and Hadoop</a> (main speaker: David Champagne)
