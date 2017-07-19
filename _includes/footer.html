@@ -2,6 +2,10 @@
 
   <div class="wrapper">
 
+    <div class="SendComment">
+      <a href="mailto:antonio@piccolboni.info?subject={{ page.title }}&body={{ site.url }}{{site.baseurl}}{{ page.url }}" target="_top">Email the author</a>
+      <!-- or <a href="http://via.hypothes.is/{{site.url}}/{{site.baseurl}}{{page.url }}">annotate with hypothes.is</a> -->
+    </div>
     <div class="PageNavigation">
       {% if page.previous.url %}
         <a class="prev" href="{{page.previous.url}}">&laquo;    {{page.previous.title}}</a>
