@@ -8,14 +8,20 @@ footer: true
 <h1 class="post-title">Résumé</h1>		
 
 ## Summary
-Complete, experienced software engineer and data scientist with industrial and academic backgrounds. Most recent work on big data packages for R, information filtering, social network analysis, web analytics. Cited [5000+](http://scholar.google.com/citations?user=uNAgLfwAAAAJ) times in the scientific literature.
+Complete, experienced software engineer and data scientist with industrial and academic backgrounds. Most recent work on energy storage optimization,big data packages for R, information filtering, social network analysis. His work has been cited [5000+](http://scholar.google.com/citations?user=uNAgLfwAAAAJ) times in the scientific literature.
 
 ## Specialties
-Software for big data analytics, map-reduce algorithms. Algorithm design and implementation, data analysis. Speaker at professional meetings.
+Software for big data analytics, map-reduce algorithms. Algorithm design and implementation, data analysis, machine learning. Speaker at professional meetings.
+* [Expert](https://link.springer.com/chapter/10.1007/3-540-44581-1_14) knowledge of [machine learning](https://twitter.com/goodfellow_ian/status/835681738189754368)
+* [Unrelenting troubleshooter, delights users](https://groups.google.com/d/msg/rhadoop/CUHaESXQJ2Y/fyQzMHRkfv0J)
+* [Accomplished API designer, big data expert](https://groups.google.com/forum/#!msg/rhadoop/OetxKchYQMM/R-9Zby_zcEMJ)
 
 ## Work Experience
 
-#### Manager, Per Data LLC --- June 2013 -- present
+#### Senior Data Scientist, Stem Inc. --- 12/2016 -- present
+Design and implementation of load prediction and battery storage optimization algorithms.
+
+#### Manager, Per Data LLC --- 6/2013 -- 11/2016
 Design and development of scalable data analysis software and algorithms that combine data scientist-friendly, high level APIs with existing big data platforms (RHadoop project). Technical and instructional documents and community building through speaking engagements and forum participation. Research and analysis as related to scalable data analysis.
 
 #### Consultant, Self-employed --- 12/2010 -- 5/2013
