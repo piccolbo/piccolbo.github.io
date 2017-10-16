@@ -1,0 +1,56 @@
+==================================================================
+https://keybase.io/piccolbo
+--------------------------------------------------------------------
+
+I hereby claim:
+
+  * I am an admin of http://piccolboni.info
+  * I am piccolbo (https://keybase.io/piccolbo) on keybase.
+  * I have a public key ASDxxMA73A58l0ZwV1fEzvSykXN0CZyN6yFAic2bsA8yDAo
+
+To do so, I am signing this object:
+
+{
+  "body": {
+    "key": {
+      "eldest_kid": "0120133be2a3ddc58434e1c03c1e4e80d14c95ce31114b52717d4bd3e12bf2d617f80a",
+      "host": "keybase.io",
+      "kid": "0120f1c4c03bdc0e7c9746705757c4cef4b2917374099c8deb214089cd9bb00f320c0a",
+      "uid": "f63b4b83017bcb456cc166db3ba66419",
+      "username": "piccolbo"
+    },
+    "merkle_root": {
+      "ctime": 1508128356,
+      "hash": "d1f59471c948378ab5d602925a2f8e8a79f79e7c550bdc84f21e9f4ca8dadcd7dc917e26f0a3356ddff6584e3426782f1ebbd1fcf15fa439aaa53bb8c1d5632f",
+      "hash_meta": "f11b769d652569ddd5c6e9fd5f14e2c82b67a7a2727d5dd5fe86f0e6f33057f7",
+      "seqno": 1583254
+    },
+    "service": {
+      "hostname": "piccolboni.info",
+      "protocol": "http:"
+    },
+    "type": "web_service_binding",
+    "version": 1
+  },
+  "client": {
+    "name": "keybase.io go client",
+    "version": "1.0.33"
+  },
+  "ctime": 1508128441,
+  "expire_in": 504576000,
+  "prev": "0cd107450b149743051295075d7338643f3923b27151e5217153340318b44d37",
+  "seqno": 14,
+  "tag": "signature"
+}
+
+which yields the signature:
+
+
+hKRib2R5hqhkZXRhY2hlZMOpaGFzaF90eXBlCqNrZXnEIwEg8cTAO9wOfJdGcFdXxM70spFzdAmcjeshQInNm7APMgwKp3BheWxvYWTFA0d7ImJvZHkiOnsia2V5Ijp7ImVsZGVzdF9raWQiOiIwMTIwMTMzYmUyYTNkZGM1ODQzNGUxYzAzYzFlNGU4MGQxNGM5NWNlMzExMTRiNTI3MTdkNGJkM2UxMmJmMmQ2MTdmODBhIiwiaG9zdCI6ImtleWJhc2UuaW8iLCJraWQiOiIwMTIwZjFjNGMwM2JkYzBlN2M5NzQ2NzA1NzU3YzRjZWY0YjI5MTczNzQwOTljOGRlYjIxNDA4OWNkOWJiMDBmMzIwYzBhIiwidWlkIjoiZjYzYjRiODMwMTdiY2I0NTZjYzE2NmRiM2JhNjY0MTkiLCJ1c2VybmFtZSI6InBpY2NvbGJvIn0sIm1lcmtsZV9yb290Ijp7ImN0aW1lIjoxNTA4MTI4MzU2LCJoYXNoIjoiZDFmNTk0NzFjOTQ4Mzc4YWI1ZDYwMjkyNWEyZjhlOGE3OWY3OWU3YzU1MGJkYzg0ZjIxZTlmNGNhOGRhZGNkN2RjOTE3ZTI2ZjBhMzM1NmRkZmY2NTg0ZTM0MjY3ODJmMWViYmQxZmNmMTVmYTQzOWFhYTUzYmI4YzFkNTYzMmYiLCJoYXNoX21ldGEiOiJmMTFiNzY5ZDY1MjU2OWRkZDVjNmU5ZmQ1ZjE0ZTJjODJiNjdhN2EyNzI3ZDVkZDVmZTg2ZjBlNmYzMzA1N2Y3Iiwic2Vxbm8iOjE1ODMyNTR9LCJzZXJ2aWNlIjp7Imhvc3RuYW1lIjoicGljY29sYm9uaS5pbmZvIiwicHJvdG9jb2wiOiJodHRwOiJ9LCJ0eXBlIjoid2ViX3NlcnZpY2VfYmluZGluZyIsInZlcnNpb24iOjF9LCJjbGllbnQiOnsibmFtZSI6ImtleWJhc2UuaW8gZ28gY2xpZW50IiwidmVyc2lvbiI6IjEuMC4zMyJ9LCJjdGltZSI6MTUwODEyODQ0MSwiZXhwaXJlX2luIjo1MDQ1NzYwMDAsInByZXYiOiIwY2QxMDc0NTBiMTQ5NzQzMDUxMjk1MDc1ZDczMzg2NDNmMzkyM2IyNzE1MWU1MjE3MTUzMzQwMzE4YjQ0ZDM3Iiwic2Vxbm8iOjE0LCJ0YWciOiJzaWduYXR1cmUifaNzaWfEQB/SLUymTXHUqbV5D95Yo84Q1zPaHQ7Gzfu6rf2aN8ChTORWXOxPi7kMa7SUdtJTWqPE5indSRobZ0RppmfbLAqoc2lnX3R5cGUgpGhhc2iCpHR5cGUIpXZhbHVlxCAzMu8DUev0GRPbAYQKPMsD8ujIxITw0lnBNQRfDpyVKKN0YWfNAgKndmVyc2lvbgE=
+
+And finally, I am proving ownership of this host by posting or
+appending to this document.
+
+View my publicly-auditable identity here: https://keybase.io/piccolbo
+
+==================================================================
