@@ -8,7 +8,11 @@ date: "2017-11-04 14:09"
 Back in the 60s it was called [information
 overload](https://books.google.com/books?id=boSFAAAAMAAJ&cd=1&dq=%22the+managing+of+organizations%22&q=information+overload#search_anchor)
 and it affected so-called *decision makers*. Fast forward to today and the
-situation hasn't improved. Now it's not only decision makers who are
+situation hasn't improved.
+
+<!-- more info -->
+
+Now it's not only decision makers who are
 overloaded: it's everyone. The information is not just too much: it's trivial or
 factually incorrect or deliberately crafted to distort our beliefs, influence
 our actions and manipulate our feelings to the benefit of others. Check out the
