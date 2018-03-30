@@ -6,4 +6,4 @@ comments: true
 categories:
 ---
 
-{% include _rstudio/yapo.html %}
+{% include _content/yapo.html %}

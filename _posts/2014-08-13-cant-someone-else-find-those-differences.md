@@ -6,4 +6,4 @@ comments: true
 categories:
 ---
 
-{% include _rstudio/imnorm.html %}
+{% include _content/imnorm.html %}

@@ -6,4 +6,4 @@ comments: true
 categories:
 ---
 
-{% include _rstudio/partial-curry.html %}
+{% include _content/partial-curry.html %}

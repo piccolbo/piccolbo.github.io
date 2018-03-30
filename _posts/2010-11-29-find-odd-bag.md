@@ -6,4 +6,4 @@ comments: true
 categories:
 ---
 
-{% include _rstudio/find-odd-bag.html %}
+{% include _content/find-odd-bag.html %}

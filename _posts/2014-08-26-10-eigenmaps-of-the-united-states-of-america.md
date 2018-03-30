@@ -6,4 +6,4 @@ comments: true
 categories:
 ---
 
-{% include _rstudio/census.html %}
+{% include _content/census.html %}

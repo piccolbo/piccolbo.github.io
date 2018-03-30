@@ -6,4 +6,4 @@ comments: true
 categories:
 ---
 
-{% include _rstudio/Rdiff.html %}
+{% include _content/Rdiff.html %}

@@ -6,4 +6,4 @@ comments: true
 categories:
 ---
 
-{% include _rstudio/race10.html %}
+{% include _content/race10.html %}
