@@ -8,6 +8,7 @@
 
     // Positioning context for the mobile navigation icon
     position: fixed;
+    z-index: 9999;
     width:100%;
     background-color:$background-color;
 }
