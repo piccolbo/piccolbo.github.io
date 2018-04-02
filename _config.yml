@@ -9,33 +9,7 @@ twitter_username: piccolbo
 github_username:  piccolbo
 permalink: /:year/:month/:title.html
 
-# Build settings
-markdown: kramdown
-#destination: ../piccolboni.info.site
-#excerpt
-
 excerpt_separator: '<!-- more -->'
 
 plugins:
   - jekyll-sitemap
-  - jekyll-seo-tag
-#  - jekyll-archives
-#  - jekyll-feed
-
-# Archives, still need work
-
-# jekyll-archives:
-#   enabled: 'year'
-#   layouts:
-#     year: year-archive
-#   permalinks:
-#     year: '/:year/'
-
-# attempt to integrate nodebb
-#webserver_headers:
-#  "Access-Control-Allow-Origin": "*.piccolboni.info"
-
-#feed
-
-# feed:
-#   path: atom.xml
