@@ -12,7 +12,7 @@ layout: default
           <a class="post-link" href="{{ post.url | prepend: site.baseurl }}">{{ post.title }}</a>
         </h2>
         <span class="post-meta">{{ post.date | date: "%b %-d, %Y" }}</span>
-        <article> {{ post.content | strip_html | truncatewords:25}} </article>
+        <article> {{ post.excerpt | strip_html | truncatewords:50}} </article>
       </li>
     {% endfor %}
   </ul>
