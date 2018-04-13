@@ -4,12 +4,21 @@ title: "A Simple Loss Function for Multi-Task learning with Keras implementation
 
 
 
-date: '2018-04-13 11:40:44'
+date: '2018-04-13 13:01:16'
 ---
 
 
 In this post, we show how to implement a custom loss function for multitask
 learning in Keras and perform a couple of simple experiments with itself.
+TL;DR; this is the code:
+
+```python
+kb.exp(
+        kb.mean(kb.log(kb.mean(kb.square(y_pred - y_true), axis=0)), axis=-1))
+```
+
+
+
 <!-- more -->
 
 In a [previous
@@ -74,10 +83,6 @@ will be the learning target, simulatneously for a single model; one for the
 dependent variable; and one for the noiseless values on which the five tasks
 are based:
 
-```python
-mtl.print_table(data_hetero.head())
-```
-
 
 |    y0 |    y1 |    y2 |    y3 |    y4 |    x |     y |
 |------:|------:|------:|------:|------:|-----:|------:|
@@ -88,16 +93,16 @@ mtl.print_table(data_hetero.head())
 |  0.83 |  0.83 |  0.76 |  0.48 |  1.58 | 0.15 |  0.80 |
 
 
-While discussing multitask learning is not the goal here, this is a
-favorable setting for it, with 5 closely related tasks in that the target
-values are the same for all the tasks. But the 5 tasks are also different
-since they are progressively more noisy, a problem the multitask loss here
-presented is designed to tackle.  Let's split the data in train, test and
-stop data set.  I need a stop dataset because I plan to use *early stopping*
-to protect against overfitting, but in many papers the test set is used for
-such purpose. I believe a true test set and a learning algorithm need to have
-an "air gap" for the test set to fulfil its task, as many Kaggle competitions
-have amply
+While discussing multitask learning is not the goal here, this is a favorable
+setting for it, with 5 closely related tasks in that the noiseless function
+to be learned is the same for all the tasks. But the 5 tasks are also
+different since they are progressively more noisy, a problem the multitask
+loss here presented is designed to tackle.  Let's split the data in train,
+test and stop data set.  I need a stop dataset because I plan to use *early
+stopping* to protect against overfitting, but in many papers the test set is
+used for such purpose. I believe a true test set and a learning algorithm
+need to have an "air gap" for the test set to fulfil its task, as many Kaggle
+competitions have amply
 [demonstrated](http://blog.kaggle.com/2012/07/06/the-dangers-of-overfitting-psychopathy-post-mortem/).
 
 
@@ -134,7 +139,7 @@ commonly used.
 First let's take a peek at the training set:
 
 
-![](/assets/multitask_figure6_1.png)
+![](/assets/multitask_figure7_1.png)
 
 
 As one can see, progressively more noisy versions of the same task.
@@ -165,7 +170,7 @@ these optimizers have so many knobs that may need to be accessed to achieve
 good performance.  Not only are they laborious to operate, but they can also
 get us lost in Andrew Gelman's so-called [Garden of Forking
 Paths](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.709.5937&rep=rep1&type=pdf),
-whereby overfitting can occur more or less uintentionally.  The importance of
+whereby overfitting can occur more or less unintentionally.  The importance of
 this is starting to be
 [recognized](https://twitter.com/goodfellow_ian/status/978342148402593792) by
 the most alert members of the ML community, but is a well established theme
@@ -224,13 +229,13 @@ over the epochs of training. Also please note how this function is
 parametrized on the loss function, which will enable the central comparison
 in this post.
 
-![](/assets/multitask_figure8_1.png)
+![](/assets/multitask_figure9_1.png)
 
 
 And here is a look at the actual predictions. A more rigorous comparison
 between this and the novel approach will follow.
 
-![](/assets/multitask_figure9_1.png)
+![](/assets/multitask_figure10_1.png)
 
 
 Now let's repeat this is experiment substituting the standard MSE loss with
@@ -268,12 +273,12 @@ NN_hetero_mseh, hist_hetero_mseh = mtl.NN_experiment(
 The same loss plot as before for completeness:
 
 
-![](/assets/multitask_figure11_1.png)
+![](/assets/multitask_figure12_1.png)
 
 
 And the line plot:
 
-![](/assets/multitask_figure12_1.png)
+![](/assets/multitask_figure13_1.png)
 
 
 Is it better? Let's look into it:
@@ -346,7 +351,7 @@ is compounded by frantic competition, automation of hyperparameter search and
 by the dominance of a few very prominent benchmark datasets that have been
 studied in depth, thereby leaving no data to be used as a true test set
 anymore. In this post, working on a small synthetic dataset, there is the
-opportunity repeat the experiment many times and estimate the results'
+opportunity to repeat the experiment many times and estimate the results'
 variability:
 
 ```python
@@ -399,7 +404,7 @@ pstats_hetero = mtl.many_replications_(mtl.make_data_hetero)
 pstats_hetero.plot.box(logy=True)
 ```
 
-![](/assets/multitask_figure16_1.png)
+![](/assets/multitask_figure17_1.png)
 
 
 This provides a better understanding of how the new loss function helps in a
@@ -410,7 +415,7 @@ other means.
 
 ## Learning the $$\sin$$ function with multiple phases
 
-Let's now apply the same techniques a problem where, like in many AI
+Let's now apply the same techniques to a problem where, like in many AI
 problems, the challenge is not randomness in the data but just the complexity
 of the tasks. Specifically, let's fit a neural model to 5 shifted versions of
 the the $$\sin$$ function, with no added noise.
@@ -452,7 +457,7 @@ Let's take a look at the training data. Here the 5 tasks are equally
 difficult and, since the data is noise-free, it's more a function
 approximation problem than a statistical problem.
 
-![](/assets/multitask_figure19_1.png)
+![](/assets/multitask_figure20_1.png)
 
 
 Let's reuse the same code as in the first part of this post, starting with
@@ -469,12 +474,12 @@ NN_phase_mse, hist_phase_mse = mtl.NN_experiment(
 Let's take a look at the loss dynamic to diagnose any problems in the fitting
 process:
 
-![](/assets/multitask_figure21_1.png)
+![](/assets/multitask_figure22_1.png)
 
 
 Next, let's take a look at the results:
 
-![](/assets/multitask_figure22_1.png)
+![](/assets/multitask_figure23_1.png)
 
 
 The next run differs only in the choice of loss function:
@@ -490,12 +495,12 @@ NN_phase_mseh, hist_phase_mseh = mtl.NN_experiment(
 A look at the loss plot (please note some instability at the end of the
 process, as noted before a known problem with the Adam optimizer)
 
-![](/assets/multitask_figure24_1.png)
+![](/assets/multitask_figure25_1.png)
 
 
 And a look at the predictions:
 
-![](/assets/multitask_figure25_1.png)
+![](/assets/multitask_figure26_1.png)
 
 
 They don't look great and a quantitative assessment confirms that impression:
@@ -526,7 +531,7 @@ pstats_phase = mtl.many_replications_(mtl.make_data_phase)
 pstats_phase.plot.box(logy=True)
 ```
 
-![](/assets/multitask_figure27_1.png)
+![](/assets/multitask_figure28_1.png)
 
 It does indeed look like the first run was not particularly representative.
 The boxplot shows instead that the multitask loss outperforms the MSE loss
