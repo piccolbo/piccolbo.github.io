@@ -5,16 +5,17 @@ sharing: true
 footer: true
 ---
 
-<h1 class="post-title">Résumé</h1>		
+<h1 class="post-title">Résumé</h1>
 
 ## Summary
 Complete, experienced software engineer and data scientist with industrial and academic backgrounds. Most recent work on energy storage optimization,big data packages for R, information filtering, social network analysis. His work has been cited [5000+](http://scholar.google.com/citations?user=uNAgLfwAAAAJ) times in the scientific literature.
 
 ## Specialties
 Software for big data analytics, map-reduce algorithms. Algorithm design and implementation, data analysis, machine learning. Speaker at professional meetings.
-* [Expert](https://link.springer.com/chapter/10.1007/3-540-44581-1_14) knowledge of [machine learning](https://twitter.com/goodfellow_ian/status/835681738189754368)
-* [Unrelenting troubleshooter, delights users](https://groups.google.com/d/msg/rhadoop/CUHaESXQJ2Y/fyQzMHRkfv0J)
-* [Accomplished API designer, big data expert](https://groups.google.com/forum/#!msg/rhadoop/OetxKchYQMM/R-9Zby_zcEMJ)
+
+*   [Expert](https://link.springer.com/chapter/10.1007/3-540-44581-1_14) knowledge of [machine learning](https://twitter.com/goodfellow_ian/status/835681738189754368)
+*   [Unrelenting troubleshooter, delights users](https://groups.google.com/d/msg/rhadoop/CUHaESXQJ2Y/fyQzMHRkfv0J)
+*   [Accomplished API designer, big data expert](https://groups.google.com/forum/#!msg/rhadoop/OetxKchYQMM/R-9Zby_zcEMJ)
 
 ## Work Experience
 
