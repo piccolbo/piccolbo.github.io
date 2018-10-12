@@ -5,8 +5,8 @@ comments: false
 sharing: true
 footer: true
 ---
-*   [altair_recipes](https://github.com/piccolbo/altair_recipes), a Python package with high-level statistical primitives such as `boxplot` and `histogram` that generates interactive web graphics;
-*   [autosig](https://github.com/piccolbo/autosig), a Python package that helps designing good APIs by allowing to express regularities such as name, order, range and other properties of function arguments;
+*   [altair_recipes](https://github.com/piccolbo/altair_recipes), a Python package implementing high-level statistical graphics primitives such as `boxplot` and `histogram` which generate interactive web graphics;
+*   [autosig](https://github.com/piccolbo/autosig), a Python package that helps designing good APIs by allowing to express properties of function signatures and arguments in a reusable way;
 *   [rightload](https://github.com/piccolbo/rightload) a machine-learning powered web proxy for RSS feeds, takes your feedback about each entry and turns it into a score; yes, yet-another-algorithmic-feed, but this one only answerable to its user;
 *   <a href="https://github.com/RevolutionAnalytics/dplyr-spark">dplyr.spark</a>, an  <a href="http://www.r-project.org/">R</a> package that provides a Spark backend for [dplyr](https://github.com/hadley/dplyr);
 *   <a href="https://github.com/RevolutionAnalytics/quickcheck">quickcheck</a>, an R package supporting randomized software testing;
