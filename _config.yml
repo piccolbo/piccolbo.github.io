@@ -13,3 +13,6 @@ excerpt_separator: '<!-- more -->'
 
 plugins:
   - jekyll-sitemap
+
+
+include: [".well-known"]
