@@ -80,19 +80,17 @@ derived.
 
 We largely follow the notation in the aforementioned paper. Let $$i$$ index the
 training set and $$j$$ the dependent variables (the "tasks" in multi-task
-learning). Under the assumptions that the such variables, with realizations
-$$y_{ij}$$, are independent, conditional to the prediction returned by a model
-$$f$$, with adjustable parameters $$\vw$$, on input $$\vx_i$$; and that the
+learning). Under the assumptions that the such variables, with realizations $$y_{ij}$$, are independent, conditional to the prediction returned by a model $$f$$, with adjustable parameters $$\vw$$, on input $$\vx_i$$; and that the
 error is normally distributed and zero-mean, with variance $$\sigma_j^2$$, which
 depends only on $$j$$ (the task), we can write the log-likelihood function as
 follows:
 
-$$\sum_{ij}\log\left(\frac{1}{\sqrt{2\pi}\sigma_j^2}
+$$\sum_{ij}\log\left(\frac{1}{\sqrt{2\pi}\sigma_j}
 \exp\left(-\frac{\left(y_{ji}-f_j(\vx_i;\vw)\right)^2}{2\sigma_j^2}\right)\right)$$
 
 By the basic properties of the $$\log$$ function this can be rewritten as:
 
-$$\sum_{ij}\left(-\log(\sqrt{2\pi}) -\log\sigma_j^2 -
+$$\sum_{ij}\left(-\log(\sqrt{2\pi}) -\frac{1}{2}\log\sigma_j^2 -
 \frac{\left(y_{ji}-f_j(\vx_i;\vw)\right)^2}{2\sigma_j^2}\right)
 $$
 
@@ -101,49 +99,49 @@ considered a variable with slight abuse of notation &mdash; the substitution is
 immaterial to finding a minimum &mdash; and, dropping a constant additive term,
 we have:
 
-$$\frac{\partial}{\partial\sigma_j^2}\sum_i\left( -\log\sigma_j^2 -
+$$\frac{\partial}{\partial\sigma_j^2}\sum_i\left( -\frac{1}{2}\log\sigma_j^2 -
 \frac{\left(y_{ji}-f_j(\vx_i;\vw)\right)^2}{2\sigma_j^2}\right) = 0$$
 
 Applying the linearity of partial derivatives, and calculating the derivatives
 for each term we have:
 
-$$\sum_i\left(-\frac{1}{\sigma_j^2}+
+$$\sum_i\left(-\frac{1}{2\sigma_j^2}+
   \frac{\left(y_{ji}-f_j(\vx_i;\vw)\right)^2}{2\sigma_j^4}\right) = 0$$
 
 The first term is independent of $$i$$ so it can be extracted from the summation:
 
-$$-\frac{N}{\sigma_j^2}+\sum_i
+$$-\frac{N}{2\sigma_j^2}+\sum_i
   \frac{\left(y_{ji}-f_j(\vx_i;\vw)\right)^2}{2\sigma_j^4}= 0$$
 
 where $$N$$ is the size of the training set.
-We can simplify a common $$1/\sigma_j^2$$ factor:
+We can simplify a common $$1/2\sigma_j^2$$ factor:
 
 $$-N+\sum_i
-    \frac{\left(y_{ji}-f_j(\vx_i;\vw)\right)^2}{2\sigma_j^2} = 0$$
+    \frac{\left(y_{ji}-f_j(\vx_i;\vw)\right)^2}{\sigma_j^2} = 0$$
 
 And, finally, solving for $$\sigma_j^2$$, we have:
 
-$$\sigma_j^2 = \frac{1}{2N}\sum_i\left(y_{ji}-f_j(\vx_i;\vw)\right)^2$$
+$$\sigma_j^2 = \frac{1}{N}\sum_i\left(y_{ji}-f_j(\vx_i;\vw)\right)^2$$
 
 We can now substitute this into the likelihood, neglecting a constant term:
 
-$$\sum_{ij}\left( -\log\left(\frac{1}{2N}\sum_i
+$$\sum_{ij}\left( -\frac{1}{2}\log\left(\frac{1}{N}\sum_i
     \left(y_{ji}-f_j(\vx_i;\vw)\right)^2\right)-
-\frac{\left(y_{ji}-f_j(\vx_i;\vw)\right)^2}{\frac{1}{N}\sum_i
+\frac{\left(y_{ji}-f_j(\vx_i;\vw)\right)^2}{\frac{2}{N}\sum_i
     \left(y_{ji}-f_j(\vx_i;\vw)\right)^2}\right)$$
 
 We observe the first term is independent of $$i$$ and can be thus pulled out of
- the summation over $$i$$:
+ the summation over that variable:
 
-$$\sum_j\left(-N\log\left(\frac{1}{2N}\sum_i
+$$\sum_j\left(-\frac{N}{2}\log\left(\frac{1}{N}\sum_i
     \left(y_{ji}-f_j(\vx_i;\vw)\right)^2\right)-
-\frac{\sum_i\left(y_{ji}-f_j(\vx_i;\vw)\right)^2}{\frac{1}{N}\sum_i
+\frac{\sum_i\left(y_{ji}-f_j(\vx_i;\vw)\right)^2}{\frac{2}{N}\sum_i
     \left(y_{ji}-f_j(\vx_i;\vw)\right)^2}\right)$$
 
 The second term allows some drastic simplification:
 
-$$ \sum_j\left(-N\log\left(\frac{1}{2}\sum_i
-    \left(y_{ji}-f_j(\vx_i;\vw)\right)^2\right)-N\right)$$
+$$ \sum_j\left(-\frac{N}{2}\log\left(\frac{1}{N}\sum_i
+    \left(y_{ji}-f_j(\vx_i;\vw)\right)^2\right)-\frac{N}{2}\right)$$
 
 Then by dropping constant additive and multiplicative terms:
 
@@ -172,3 +170,5 @@ variances during the training of the neural network. Leveraging the  closed form
 solution we can train in the multitask case with no increase in complexity and
 by simply implementing this new loss function. And that's exactly what we are
 going to do in the next post (link will appear in the footer on the right), together with a couple of experiments. Stay tuned.
+
+Update: Thanks to João Paulo Lima for pointing out an error in the math. Luckily it doesn't affect the final expression. It has now been corrected in the main text.
