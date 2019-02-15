@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "`altair_recipes`: a Python package to generate essential statistical graphics for the web"
+title: "altair_recipes: a Python package to generate essential statistical graphics for the web"
 date: "2019-02-11 17:32:04 -0800"
 ---
 
