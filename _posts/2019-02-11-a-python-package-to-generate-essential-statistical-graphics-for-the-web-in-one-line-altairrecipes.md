@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "altair_recipes: a Python package to generate essential statistical graphics for the web"
-date: "2019-02-11 17:32:04 -0800"
+date: "2019-02-14 17:32:04 -0800"
 ---
 
 If you don't need the full power of the *grammar of graphics* to generate classical plots for the web `altair_recipes` is the the easy way. Check it out with `pip install altair_recipes`.
@@ -2075,9 +2075,10 @@ Opacity is used to prevent some points from completely hiding others. Opacity an
 
 
 ```python
+
 show(
     autoplot(
-        data.iris().sample(20),
+        data.iris().sample(30, random_state=1),
         columns=["petalLength", "sepalLength", "species"],
         width=width,
     ),
@@ -2086,7 +2087,7 @@ show(
 ```
 
 
-<div id="Aa136ef8bfe760eae7f04003b1f503aef2393e5cf9acf41aa042f1272233d556f"></div>
+<div id="A71caa65f865118a83bbe26bb55c7e065784aed47fe88bd4add7c251ab03ef0ac"></div>
   <script type="text/javascript">
     var spec = {
   "$schema": "https://vega.github.io/schema/vega-lite/v2.6.0.json",
@@ -2097,69 +2098,104 @@ show(
     }
   },
   "data": {
-    "name": "data-de4ef6d9561928b25ed5a67e4ede9fc5"
+    "name": "data-3448e024270005cbe8084ef545c262d7"
   },
   "datasets": {
-    "data-de4ef6d9561928b25ed5a67e4ede9fc5": [
+    "data-3448e024270005cbe8084ef545c262d7": [
       {
-        "petalLength": 4.0,
-        "sepalLength": 6.1,
+        "petalLength": 1.2,
+        "sepalLength": 5.8,
+        "species": "setosa"
+      },
+      {
+        "petalLength": 3.0,
+        "sepalLength": 5.1,
         "species": "versicolor"
       },
       {
-        "petalLength": 6.0,
-        "sepalLength": 7.2,
-        "species": "virginica"
-      },
-      {
-        "petalLength": 5.6,
-        "sepalLength": 6.3,
-        "species": "virginica"
+        "petalLength": 4.4,
+        "sepalLength": 6.6,
+        "species": "versicolor"
       },
       {
         "petalLength": 1.3,
+        "sepalLength": 5.4,
+        "species": "setosa"
+      },
+      {
+        "petalLength": 6.4,
+        "sepalLength": 7.9,
+        "species": "virginica"
+      },
+      {
+        "petalLength": 4.7,
+        "sepalLength": 6.3,
+        "species": "versicolor"
+      },
+      {
+        "petalLength": 5.1,
+        "sepalLength": 6.9,
+        "species": "virginica"
+      },
+      {
+        "petalLength": 1.9,
+        "sepalLength": 5.1,
+        "species": "setosa"
+      },
+      {
+        "petalLength": 1.6,
         "sepalLength": 4.7,
         "species": "setosa"
       },
       {
-        "petalLength": 4.8,
-        "sepalLength": 5.9,
-        "species": "versicolor"
-      },
-      {
-        "petalLength": 4.8,
-        "sepalLength": 6.0,
+        "petalLength": 5.7,
+        "sepalLength": 6.9,
         "species": "virginica"
-      },
-      {
-        "petalLength": 3.3,
-        "sepalLength": 5.0,
-        "species": "versicolor"
       },
       {
         "petalLength": 4.2,
-        "sepalLength": 5.7,
+        "sepalLength": 5.6,
         "species": "versicolor"
       },
       {
-        "petalLength": 5.6,
-        "sepalLength": 6.1,
-        "species": "virginica"
-      },
-      {
-        "petalLength": 6.7,
-        "sepalLength": 7.7,
-        "species": "virginica"
-      },
-      {
-        "petalLength": 1.4,
-        "sepalLength": 4.6,
+        "petalLength": 1.7000000000000002,
+        "sepalLength": 5.4,
         "species": "setosa"
       },
       {
+        "petalLength": 5.9,
+        "sepalLength": 7.1,
+        "species": "virginica"
+      },
+      {
         "petalLength": 4.5,
-        "sepalLength": 5.4,
+        "sepalLength": 6.4,
         "species": "versicolor"
+      },
+      {
+        "petalLength": 4.5,
+        "sepalLength": 6.0,
+        "species": "versicolor"
+      },
+      {
+        "petalLength": 1.3,
+        "sepalLength": 4.4,
+        "species": "setosa"
+      },
+      {
+        "petalLength": 4.0,
+        "sepalLength": 5.8,
+        "species": "versicolor"
+      },
+      {
+        "petalLength": 4.5,
+        "sepalLength": 5.6,
+        "species": "versicolor"
+      },
+      {
+        "petalLength": 1.5,
+        "sepalLength": 5.4,
+        "species": "setosa"
       },
       {
         "petalLength": 1.2,
@@ -2167,39 +2203,54 @@ show(
         "species": "setosa"
       },
       {
-        "petalLength": 1.4,
-        "sepalLength": 5.2,
-        "species": "setosa"
+        "petalLength": 4.4,
+        "sepalLength": 5.5,
+        "species": "versicolor"
       },
       {
-        "petalLength": 1.6,
+        "petalLength": 4.5,
+        "sepalLength": 5.4,
+        "species": "versicolor"
+      },
+      {
+        "petalLength": 5.0,
+        "sepalLength": 6.7,
+        "species": "versicolor"
+      },
+      {
+        "petalLength": 1.3,
         "sepalLength": 5.0,
         "species": "setosa"
       },
       {
-        "petalLength": 5.3,
-        "sepalLength": 6.4,
+        "petalLength": 6.0,
+        "sepalLength": 7.2,
         "species": "virginica"
       },
       {
-        "petalLength": 5.2,
-        "sepalLength": 6.5,
-        "species": "virginica"
+        "petalLength": 4.1,
+        "sepalLength": 5.7,
+        "species": "versicolor"
+      },
+      {
+        "petalLength": 1.4,
+        "sepalLength": 5.5,
+        "species": "setosa"
       },
       {
         "petalLength": 1.5,
-        "sepalLength": 4.9,
+        "sepalLength": 5.1,
         "species": "setosa"
       },
       {
-        "petalLength": 1.0,
-        "sepalLength": 4.6,
-        "species": "setosa"
-      },
-      {
-        "petalLength": 3.3,
-        "sepalLength": 4.9,
+        "petalLength": 4.7,
+        "sepalLength": 6.1,
         "species": "versicolor"
+      },
+      {
+        "petalLength": 5.0,
+        "sepalLength": 6.3,
+        "species": "virginica"
       }
     ]
   },
@@ -2225,7 +2276,7 @@ show(
   "width": 700
 };
     var opt = {"renderer": "canvas", "actions": false};
-    vegaEmbed("#Aa136ef8bfe760eae7f04003b1f503aef2393e5cf9acf41aa042f1272233d556f", spec, opt);
+    vegaEmbed("#A71caa65f865118a83bbe26bb55c7e065784aed47fe88bd4add7c251ab03ef0ac", spec, opt);
   </script>
   
 
