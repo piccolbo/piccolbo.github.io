@@ -19,7 +19,7 @@ Software for big data analytics, map-reduce algorithms. Algorithm design and imp
 
 ## Work Experience
 
-#### Senior Data Scientist, Stem Inc. --- 12/2016 -- present
+#### Senior Data Scientist, Stem Inc. --- 12/2016 -- 2/2018
 Design and implementation of load prediction and battery storage optimization algorithms.
 
 #### Manager, Per Data LLC --- 6/2013 -- 11/2016
