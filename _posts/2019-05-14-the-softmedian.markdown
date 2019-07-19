@@ -24,7 +24,7 @@ $$
 \newcommand{\R}{\mathbb{R}}$$
 
 
-Why is there a $$\softmax$$ function, but not a $$\softmedian$$? Let's create not one,
+Why is there a `softmax` function, but not a `softmedian`? Let's create not one,
 but  a few of them.
 
 <!--more-->
