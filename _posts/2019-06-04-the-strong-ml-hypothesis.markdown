@@ -47,7 +47,7 @@ correct.
 - [Performance outside the test set](#performance-outside-the-test-set)
 - [Architecture matters](#architecture-matters)
 - [Misspecified models](#misspecified-models)
-  - [If scale is all that matters, we are in trouble](#if-scale-is-all-that-matters-we-are-in-trouble)
+- [If scale is all that matters, we are in trouble](#if-scale-is-all-that-matters-we-are-in-trouble)
 - [Scaling is getting harder](#scaling-is-getting-harder)
 - [Conclusion](#conclusion)
 
