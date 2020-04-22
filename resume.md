@@ -15,6 +15,13 @@ information filtering, social network analysis. His work has been cited
 [5000+](http://scholar.google.com/citations?user=uNAgLfwAAAAJ) times in the scientific
 literature.
 
+<!--
+## On line
+This document always up-to-date and with working links:
+https://piccolboni.info/resume. Blog, projects and more info at
+[https://piccolboni.info](https://piccolboni.info)
+-->
+
 ## Specialties
 
 Software for big data analytics, map-reduce algorithms. Algorithm design and
@@ -50,7 +57,7 @@ several internal projects. rmr became the de-facto standard for big data analyti
 and has been downloaded more than 1M times. Technical and instructional documents and
 community building through speaking engagements and forum participation.  Presented at
 [strata](https://conferences.oreilly.com/strata/strata2012/public/schedule/speaker/96066).
-Other projects included text analysis of user interactions for a software developer,
+Other projects include text analysis of user interactions for a software developer,
 using NLTK and scikit-learn, and a large data integration project with approximate user
 identification.
 
