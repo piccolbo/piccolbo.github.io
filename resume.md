@@ -1,26 +1,12 @@
----
-layout: page
-comments: false
-sharing: true
-footer: true
----
-
 <h1 class="post-title">Résumé</h1>
 
 ## Summary
 
-Complete, experienced software engineer and data scientist with industrial and academic
-backgrounds. Select work includes energy storage optimization, big data packages for R,
-information filtering, social network analysis. His work has been cited
-[5000+](http://scholar.google.com/citations?user=uNAgLfwAAAAJ) times in the scientific
-literature.
+Complete, experienced data scientist and software engineer with industrial and academic
+backgrounds. Select work includes load prediction for energy storage optimization, big
+data packages for R, information filtering and social network analysis. More than [5000](http://scholar.google.com/citations?user=uNAgLfwAAAAJ) citations in the
+scientific literature.
 
-<!--
-## On line
-This document always up-to-date and with working links:
-https://piccolboni.info/resume. Blog, projects and more info at
-[https://piccolboni.info](https://piccolboni.info)
--->
 
 ## Specialties
 
