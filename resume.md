@@ -15,7 +15,7 @@ information filtering, social network analysis. His work has been cited
 [5000+](http://scholar.google.com/citations?user=uNAgLfwAAAAJ) times in the scientific
 literature.
 
-<!--
+<!-- This is for print version, comment yaml preamble
 ## On line
 This document always up-to-date and with working links:
 https://piccolboni.info/resume. Blog, projects and more info at
