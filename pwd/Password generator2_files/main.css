@@ -1,0 +1,48 @@
+@import url("http://fonts.googleapis.com/css?family=Lobster");
+
+* { margin: 0; padding: 0; }
+
+body {
+	color: #666;
+	background: #ddf;
+	margin: 10px;
+	padding: 5px 40px 40px 35px;
+	border: dotted grey 1px;
+	font-family: Lucida Grande, Verdana, sans-serif;
+	font-size: smaller;
+
+	background-image: none;
+	background-repeat: no-repeat;
+	background-position: 10px 10px;
+}
+body.white { background: white; }
+
+h1, h2 { font-family: Lobster; }
+h1 { 
+	clear: left; font-size: 2em; color: #444; text-shadow: 2px 2px 4px #99b; 
+	margin: 30px 30px .5em 0px; 
+}
+form + h1 { padding-top: 10px; }
+h2 { 
+	font-size: 1.5em; color: #444; text-shadow: 2px 2px 4px #99b; 
+	margin-top: 1em; margin: 1em 30px .15em 5px; 
+}
+h3 { display: run-in; color: black; }
+
+p, li, ul, ol, dl, dt, form, pre { margin: 1em 0 0 10px; clear: left; }
+dd, ul, li { margin-top: .2em; }
+ol, ul { margin-left: 25px; }
+dt, ul li, ol li { margin-left: 1em; }
+ul li { list-style-type: circle; }
+dd { margin-left: 2em; }
+dd ul { margin-top: 10px; margin-left: 0; }
+input { margin: .25em; font-family: Monaco, Andale Mono, Verdana, monospace; }
+
+b { color: black; }
+.callout { background: #fff; border: solid 1px; padding: 10px; }
+form.callout { background: #fff; border: dotted 1px; padding: 5px; margin-bottom: 1em; float: left; }
+
+a#bookmarklet { font-weight: bold }
+
+ul#menu { margin: 0; float: right; margin-right: -35px; }
+ul#menu li { margin: 0; margin-left: 5px; padding: 0; font-size: smaller; display: inline; }
