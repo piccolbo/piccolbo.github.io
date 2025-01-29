@@ -4,9 +4,9 @@ title: "altair_recipes: a Python package to generate essential statistical graph
 date: "2019-02-14 17:32:04 -0800"
 ---
 
-If you don't need the full power of the *grammar of graphics* to generate classical plots for the web `altair_recipes` is the the easy way. Check it out with `pip install altair_recipes`.
+If you don't need the full power  of the *grammar of graphics* to generate classical plots for the web `altair_recipes` is the the easy way. Check it out with `pip install altair_recipes`.
 
-<!-- more -->
+<!--more-->
 
 ## Preliminaries
 
@@ -1213,7 +1213,7 @@ show(
     var opt = {"renderer": "canvas", "actions": false};
     vegaEmbed("#A63597923c7ecec7ccf7f4836d88b9b3a5ac50b068edadfd2f60e93ff1cab2fcd", spec, opt);
   </script>
-  
+
 
 
 (The `show` call is only for compatibility with my publishing pipeline &mdash; skip if you are developing in a notebook or any IPython-kernel-based environment such as the atom extension [Hydrogen](https://atom.io/packages/hydrogen)).
@@ -2069,7 +2069,7 @@ show(
     var opt = {"renderer": "canvas", "actions": false};
     vegaEmbed("#A44ee3a76f7f8a0abe6fbae6871933382598aef532120f8c21a1b1d6a24815662", spec, opt);
   </script>
-  
+
 
 Opacity is used to prevent some points from completely hiding others. Opacity and discrete color scales don't mix well, hence the use of faceting. In fact, just by displaying a subset of points, we can see the plot type adapt with no other change in the `autoplot` call.
 
@@ -2278,7 +2278,7 @@ show(
     var opt = {"renderer": "canvas", "actions": false};
     vegaEmbed("#A71caa65f865118a83bbe26bb55c7e065784aed47fe88bd4add7c251ab03ef0ac", spec, opt);
   </script>
-  
+
 
 
 With minimal overlap between points, there is no need to use opacity, which allows to represent the species with color as opposed to faceting. This also allows to keep the chart bigger (but size can also be specified by the user).

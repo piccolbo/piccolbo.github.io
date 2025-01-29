@@ -7,7 +7,7 @@ date: "2018-03-08 11:51"
 In this post I walk through a recent paper about multi-task learning and fill
 in some mathematical details. Implementation and  experiments will follow in a later post.
 
-<!-- more -->
+<!--more-->
 
 
 

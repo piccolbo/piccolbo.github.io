@@ -5,6 +5,11 @@ date: "2019-05-14 16:26:45 -0700"
 ---
 
 
+Why is there a `softmax` function, but not a `softmedian`? Let's create not one,
+but  a few of them.
+
+<!--more-->
+
 
 $$
 \newcommand{\f}[1]{\mathrm{#1}}
@@ -22,12 +27,6 @@ $$
 \newcommand{\softremedian}{\soft{remedian}}
 \newcommand{\softargremedian}{\soft{argremedian}}
 \newcommand{\R}{\mathbb{R}}$$
-
-
-Why is there a `softmax` function, but not a `softmedian`? Let's create not one,
-but  a few of them.
-
-<!--more-->
 
 ## Basics
 

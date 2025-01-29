@@ -9,7 +9,5 @@ twitter_username: piccolbo
 github_username:  piccolbo
 permalink: /:year/:month/:title.html
 
-excerpt_separator: '<!-- more -->'
-
 plugins:
   - jekyll-sitemap

@@ -19,7 +19,7 @@ kb.exp(
 
 
 
-<!-- more -->
+<!--more-->
 
 In a [previous
 post](/2018/03/a-simple-loss-function-for-multi-task-learning-with-keras-implementation.html),
