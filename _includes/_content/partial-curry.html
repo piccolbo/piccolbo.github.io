@@ -1,5 +1,5 @@
 <p>In R, <code>functional::Curry</code> is a misnomer at best. Let’s implement currying in R.</p>
-<!-- more -->
+<!--more-->
 <p>I’ve always wondered why the function <code>Curry</code> in package <code>functional</code> for the language R is named that way when it actually implements partial application. What it does is transfroming a function into another one with a smaller number of arguments, which is very useful when a program contains several calls to the same function with some arguments varying and some fixed. Instead of cutting and pasting them, a no-no of <a href="http://asceticprogrammer.info">ascetic programming</a>, we can create a function that doesn’t need these repetitive arguments via partial application.</p>
 <p>Let’s say you want to simulate dice throwing. You can define a <code>dice</code> function:</p>
 <pre class="r"><code>suppressMessages(library(bettR))
